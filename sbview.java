@@ -1,0 +1,770 @@
+package edu.ycp.ece220.rgb;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Polygon;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
+import java.io.File;
+import java.io.IOException;
+import java.awt.event.KeyEvent;
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
+/**
+ * KaboomView is the GUI panel class.
+ * It draws a picture of each frame of animation based on the
+ * game state (Game object), handles user input (mouse moves),
+ * and updates the game state based on the user input.
+ * @param <keyListener>
+ */
+public class sbview extends JPanel {
+	private static final long serialVersionUID = 1L;
+	private static final Color BACKGROUND_COLOR = new Color(0, 127, 0);
+	private static final Color BUCKET_COLOR = new Color(/*139*/92, /*69*/64, /*19*/51);
+	private static final Color TREE_TRUNK = new Color(139, 69, 19);
+	private static final Color MAGMA = new Color(128, 20, 20);
+	private static final Color SAND = new Color(255, 178, 102);
+	private static final Color ROCK = new Color(160, 160, 160);
+//	private static final Color BOMBER_COLOR = Color.WHITE;
+//	private static final Color BOMB_COLOR = Color.BLACK;
+	
+	// The game object contains all of the game state data.
+	private game game;
+	
+	// TODO: add any other fields you need
+	int x, y;
+	Point mouse;
+	
+	/**
+	 * Constructor.
+	 * 
+	 * @param game the Game object representing the game state
+	 */
+	public sbview(game game) {
+		this.game = game;
+		setBackground(BACKGROUND_COLOR);
+		setPreferredSize(new Dimension((int)game.WIDTH, (int)game.HEIGHT));
+		mouse = new Point(0, 0);
+	}
+	
+	/**
+	 * Start the game.
+	 */
+	public void startGame() {
+		// Create the animation timer.
+		// It will fire an event about 60 times per second.
+		// Every time a timer event fires the handleTimerEvent method
+		// will be called.
+		Timer timer = new Timer(1000 / 60, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					handleTimerEvent();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		timer.start();
+		
+		
+		// Add a listener for mouse motion.
+		// Each time the mouse is moved, the handleMouseMove method
+		// will be called.
+		addMouseMotionListener(new MouseAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				handleMouseMove(e);
+			}
+		});
+
+	    setFocusable(true);
+	    requestFocusInWindow();
+	    
+	    addKeyListener(new KeyAdapter() {
+	    	
+	    	@Override
+	    	public void keyPressed(KeyEvent e) {
+	    		jumpEvent(e);
+	    	}
+	    		
+		});
+
+	    addKeyListener(new KeyAdapter() {
+
+	    	@Override
+	        public void keyTyped(KeyEvent e) {
+	    		myKeyEvt(e, "keyTyped");
+	        }
+
+	        @Override
+	        public void keyPressed(KeyEvent e) {
+	           myKeyEvt(e, "keyPressed");
+	        }
+	        
+	    	@Override
+	        public void keyReleased(KeyEvent e) {
+	        	myKeyEvt(e, "keyReleased");
+	        }
+
+	    });
+	    
+	}
+
+	private void jumpEvent(KeyEvent e) {
+		int key = e.getKeyCode();
+        if(key == KeyEvent.VK_KP_UP || key == KeyEvent.VK_UP || key == KeyEvent.VK_SPACE || key == KeyEvent.VK_W) {
+        	if(!game.falling) {
+//        		System.out.printf("up");
+        		game.jumping = true;
+        	}
+        }
+        repaint();
+	}
+	
+    private void myKeyEvt(KeyEvent e, String text) {
+        int key = e.getKeyCode();
+//        System.out.println("TEST");
+        if(game.game) {
+            if (key == KeyEvent.VK_KP_LEFT || key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)
+            {
+//                System.out.println(text + " LEFT");
+                //Call some function
+                if(text.contains("Pressed") || text.contains("Typed")) {
+                    game.left = true;
+                } else if(text.contains("Released")) {
+                    game.left = false;
+                }
+                game.walking = true;
+            }
+            else if (key == KeyEvent.VK_KP_RIGHT || key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D)
+            {
+//                System.out.println(text + " RIGHT");
+                //Call some function
+                if(text.contains("Pressed") || text.contains("Typed")) {
+                	game.right = true;
+                } else if(text.contains("Released")) {
+                	game.right = false;
+                }
+                game.walking = true;
+            } else if(key == KeyEvent.VK_EQUALS) {
+            	game.levelUp = true;
+            }
+        }
+        
+        if(key == KeyEvent.VK_1 && game.menu) {
+        	
+        	//if '1' is pressed, exit menu and launch gameInit
+        	game.menu = false;
+        	game.gameInit = true;
+        	
+        	//reset charPos for new game
+        	game.mainChar.charPos.x = 0;
+        	game.mainChar.charPos.y = (int)game.HEIGHT - 2*game.spriteHeight;
+        	
+        }
+        
+        if(key == KeyEvent.VK_Q && game.crawl) {
+        	
+        	//stop crawl music
+        	game.clip.stop();
+        	
+        	//if 'q' is pressed, exit crawl and launch menuInit
+        	game.menuInit = true;
+        	game.crawl = false;
+        	
+        }
+        
+        repaint();
+     }
+	
+	protected void handleTimerEvent() throws IOException {
+		// You should not need to change this method.
+		game.timerTick();
+		repaint();
+	}
+	
+	protected void handleMouseMove(MouseEvent e) {
+		// TODO: handle mouse movement
+		if(game.menu) {
+//			System.out.printf("\nit made it here at least");
+			x = e.getX();
+			y = e.getY();
+			mouse.x = x;
+			mouse.y = y;
+			repaint();
+		}
+
+	}
+	
+	@Override
+	protected void paintComponent(Graphics g) {
+		//CRAWL______________________________
+		if(game.crawl) {
+			g.setColor(Color.BLACK);
+			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+			createImage(g, "./files/intro.png", ((int)game.WIDTH/2) - 130, game.introPos, 263, 514);
+		}
+		
+		//MENU_______________________________
+		if(game.menu) {
+			g.setColor(Color.BLACK);
+			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+			createImage(g, "./files/sb2.png", 0, 0, game.WIDTH, game.HEIGHT); 
+		}
+		
+//		if(game.gameInit) {
+//			g.setColor(Color.BLACK);
+//			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+//			g.drawString("Level 1", (int)(game.WIDTH / 2.1), (int)(game.HEIGHT / 2.1));
+//		}
+
+		//GAME_______________________________
+		if(game.game || game.pregame) {
+			
+			//CLEAR AND FILL THE BACKGROUND
+			g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+			g.setColor(Color.BLACK);
+			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+
+			//ESTABLISH NEW FRAMEPOS BASED ON X-COORD OF CHARPOS
+			Point framePos = new Point(game.mainChar.charPos.x + game.WIDTH/2, game.mainChar.charPos.y);
+			
+			if(-game.mainChar.charPos.x < game.WIDTH/2 || game.boss) {	//beginning of level (let user get to middle of screen -- no scroll)
+				
+				//draw foreground
+//				createTree(g, new Point(250, 260));	//values are static because this is the beginning of the level (char isn't midscreen yet)
+				g.setColor(Color.DARK_GRAY);
+				for(int x = 0; x < game.WIDTH; x += 40) {
+					for(int y = 0; y < game.HEIGHT; y += 20) {
+						if((y/20) % 2 == 0) {
+							g.drawRect(x, y, 40, 20);
+						} else {
+							g.drawRect(x + 20, y, 40, 20);
+						}
+					}
+				}
+				createWindow(g, new Rectangle(new Point(250, 200), 50, 50));
+				createWindow(g, new Rectangle(new Point(750, 120), 50, 50));
+				
+				//coldpop
+				for(int i = 0; i < game.popList.size(); i++) {
+					g.setColor(Color.CYAN);
+					g.fillRoundRect((int)game.popList.get(i).topLeft.x, (int)game.popList.get(i).topLeft.y, (int)game.popList.get(i).width, (int)game.popList.get(i).height, 5, 50);
+					g.setColor(Color.BLACK);
+					g.fillRoundRect((int)(game.popList.get(i).topLeft.x + 1), (int)game.popList.get(i).topLeft.y + 1, (int)game.popList.get(i).width - 2, (int)game.popList.get(i).height - 2, 5, 50);
+				}
+				
+				//rocks
+				for(int i = 0; i < game.rockList.size(); i++) {
+					g.setColor(ROCK);
+					g.fillRoundRect((int)game.rockList.get(i).topLeft.x, (int)game.rockList.get(i).topLeft.y, (int)game.rockList.get(i).width, (int)game.rockList.get(i).height, 50, 50);
+				}
+				
+				//draw blocks
+				g.setColor(BUCKET_COLOR);
+				for(int i = 0; i < game.blockList.size(); i++) {
+					g.setColor(BUCKET_COLOR);
+					g.fillRect((int)game.blockList.get(i).topLeft.x, (int)game.blockList.get(i).topLeft.y, (int)game.blockList.get(i).width, (int)game.blockList.get(i).height);
+					if(game.blockList.get(i).width == game.spriteWidth && game.blockList.get(i).height == game.spriteHeight) {
+						g.setColor(Color.BLACK);
+						g.drawRect((int)game.blockList.get(i).topLeft.x, (int)game.blockList.get(i).topLeft.y, game.spriteWidth, game.spriteHeight);
+					}
+				}
+				
+				//lift
+				for(int i = 0; i < game.liftList.size(); i++) {
+					g.setColor(Color.LIGHT_GRAY);
+					g.fillRect((int)game.liftList.get(i).pos.x, (int)game.liftList.get(i).pos.y, (int)game.liftList.get(i).liftBlock.width, (int)game.liftList.get(i).liftBlock.height);
+				}
+				
+				//sand
+				for(int i = 0; i < game.sandList.size(); i++) {
+					g.setColor(SAND);
+					g.fillRoundRect((int)game.sandList.get(i).topLeft.x, (int)game.sandList.get(i).topLeft.y, (int)game.sandList.get(i).width, (int)game.sandList.get(i).height, 20, 20);
+				}
+				
+				//magma
+				for(int i = 0; i < game.magmaList.size(); i++) {
+					g.setColor(MAGMA);
+					g.fillRect((int)game.magmaList.get(i).topLeft.x, (int)game.magmaList.get(i).topLeft.y, (int)game.magmaList.get(i).width, (int)game.magmaList.get(i).height);
+				}
+				
+				//notes
+				for(int i = 0; i < game.noteList.size(); i++) {
+					g.setColor(Color.WHITE);
+					g.drawString(game.noteList.get(i).data, (int)game.noteList.get(i).pos.x, (int)game.noteList.get(i).pos.y);
+				}
+				
+				//fireballs
+				for(int i = 0; i < game.fireList.size(); i++) {
+//					createSprite(g, "sprites/fireball.png", (int)game.fireList.get(i).pos.x, (int)game.fireList.get(i).pos.y);
+//					g.setColor(Color.RED);
+//					g.fillArc((int)game.fireList.get(i).pos.x, (int)game.fireList.get(i).pos.y, game.spriteWidth, 2*game.spriteHeight, 180, 180);
+					g.setColor(Color.RED);
+					g.fillRoundRect((int)game.fireList.get(i).pos.x, (int)game.fireList.get(i).pos.y, game.spriteWidth, 2*game.spriteHeight, 5000, 2000);
+					g.setColor(Color.ORANGE);
+					g.fillRoundRect((int)game.fireList.get(i).pos.x + 5, (int)game.fireList.get(i).pos.y + 5, game.spriteWidth - 10, 2*game.spriteHeight - 10, 5000, 2000);
+//					createFire(g, new Point((int)game.fireList.get(i).pos.x + 10, (int)game.fireList.get(i).pos.y - 15));
+				}
+				
+				//jetsuit
+				for(int i = 0; i < game.jetList.size(); i++) {
+					createSprite(g, "./sprites/jetsuitleft.png", game.jetList.get(i).pos.x, game.jetList.get(i).pos.y);
+				}
+				
+				//suits
+				for(int i = 0; i < game.suitList.size(); i++) {
+					if(game.suitList.get(i).forward) {
+						if(game.strideSuitFrame == 1) {
+							createImage(g, "./sprites/suit1righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+						} else if(game.strideSuitFrame == 2) {
+							createImage(g, "./sprites/suit2righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+						} else if(game.strideSuitFrame == 3) {
+							createImage(g, "./sprites/suit3righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+						} else if(game.strideSuitFrame == 4) {
+							createImage(g, "./sprites/suit4righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+						} else {
+							createImage(g, "./sprites/suit1righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+						}
+					} else {
+						if(game.strideSuitFrame == 1) {
+							createImage(g, "./sprites/suit1lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+						} else if(game.strideSuitFrame == 2) {
+							createImage(g, "./sprites/suit2lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+						} else if(game.strideSuitFrame == 3) {
+							createImage(g, "./sprites/suit3lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+						} else if(game.strideSuitFrame == 4) {
+							createImage(g, "./sprites/suit4lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+						} else {
+							createImage(g, "./sprites/suit1lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+						}
+					}
+				}
+				for(int i = 0; i < game.tempSuit.size(); i++) {
+					if(game.tempSuit.get(i).forward) {
+						createImage(g, "./sprites/deadsuitrighttrans.png", game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
+					} else {
+						createImage(g, "./sprites/deadsuitlefttrans.png", game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
+					}
+				}
+
+				//RUNNING ANIMATION (LEFT)
+				if(!game.mainChar.forward) {
+					//JUMPING ANIMATION
+					if(game.jumping || game.falling) {
+						createSprite(g, "./sprites/misha2lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+					} else {
+						if(game.stride == 1) {
+							createSprite(g, "./sprites/stride1lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						} else if(game.stride == 2) {
+							createSprite(g, "./sprites/stride2lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						} else if(game.stride == 3) {
+							createSprite(g, "./sprites/stride3lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						} else if(game.stride == 4) {
+							createSprite(g, "./sprites/stride4lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						} else {
+							createSprite(g, "./sprites/misha1lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						}
+					}
+				//RUNNING ANIMATION (RIGHT)
+				} else if(game.mainChar.forward) {
+					//JUMPING ANIMATION
+					if(game.jumping || game.falling) {
+						createSprite(g, "./sprites/misha2righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+					} else {
+						if(game.stride == 1) {
+							createSprite(g, "./sprites/stride1righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						} else if(game.stride == 2) {
+							createSprite(g, "./sprites/stride2righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						} else if(game.stride == 3) {
+							createSprite(g, "./sprites/stride3righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						} else if(game.stride == 4) {
+							createSprite(g, "./sprites/stride4righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						} else {
+							createSprite(g, "./sprites/misha1righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						}
+					}
+					
+				}
+				
+				//draw level counter
+				String level = Integer.toString(game.level);
+				g.setColor(Color.WHITE);
+				g.drawString("level: " + level, (int)game.WIDTH - 50, (int)35);
+				String score = Double.toString(game.score);
+				g.drawString("score: " + score, (int)game.WIDTH - (5 * score.length()) - 50, 15);
+				//draw exit door
+				createSprite(g, "./sprites/exitStairs.png", (int)game.door.topLeft.x, (int)game.door.topLeft.y);
+				//draw boss door
+				createImage(g, "./sprites/fireExit.png", (int)game.bossDoor.topLeft.x, (int)game.bossDoor.topLeft.y, 40, 80);
+				
+			} else {	//normal mid screen scroll
+				
+				//draw foreground
+				
+//				createTree(g, new Point(framePos.x + 250, 260));	//IMPORTANT: x-term allows tree to scroll with bg!!!
+//				createTree(g, new Point(framePos.x + 750, 260));
+				g.setColor(Color.DARK_GRAY);
+				for(int x = 0; x < 10*game.WIDTH; x += 40) {
+					for(int y = 0; y < game.HEIGHT; y += 20) {
+						if((y/20) % 2 == 0) {
+							g.drawRect((int)(framePos.x + x), y, 40, 20);
+						} else {
+							g.drawRect((int)(framePos.x + x + 20), y, 40, 20);
+						}
+					}
+				}
+				createWindow(g, new Rectangle(new Point(framePos.x + 250, 200), 50, 50));
+				createWindow(g, new Rectangle(new Point(framePos.x + 750, 120), 50, 50));
+				createWindow(g, new Rectangle(new Point(framePos.x + 1250, 50), 50, 50));
+				createWindow(g, new Rectangle(new Point(framePos.x + 1750, 250), 50, 50));
+				createWindow(g, new Rectangle(new Point(framePos.x + 2250, 100), 25, 25));
+				createWindow(g, new Rectangle(new Point(framePos.x + 2750, 100), 50, 50));
+				createWindow(g, new Rectangle(new Point(framePos.x + 3250, 100), 30, 30));
+				createWindow(g, new Rectangle(new Point(framePos.x + 3750, 100), 50, 50));
+				createWindow(g, new Rectangle(new Point(framePos.x + 4250, 100), 40, 40));
+				createWindow(g, new Rectangle(new Point(framePos.x + 4750, 200), 50, 50));
+				createWindow(g, new Rectangle(new Point(framePos.x + 5250, 75), 50, 50)); 
+				createWindow(g, new Rectangle(new Point(framePos.x + 5750, 125), 40, 40)); 
+				createWindow(g, new Rectangle(new Point(framePos.x + 6250, 200), 30, 30)); 
+
+				//coldpop
+				for(int i = 0; i < game.popList.size(); i++) {
+					g.setColor(Color.CYAN);
+					g.fillRoundRect((int)(framePos.x + game.popList.get(i).topLeft.x), (int)game.popList.get(i).topLeft.y, (int)game.popList.get(i).width, (int)game.popList.get(i).height, 5, 50);
+					g.setColor(Color.BLACK);
+					g.fillRoundRect((int)(framePos.x + game.popList.get(i).topLeft.x + 1), (int)game.popList.get(i).topLeft.y + 1, (int)game.popList.get(i).width - 2, (int)game.popList.get(i).height - 2, 5, 50);
+
+				}
+				
+				//rocks
+				for(int i = 0; i < game.rockList.size(); i++) {
+					g.setColor(ROCK);
+					g.fillRoundRect((int)(framePos.x + game.rockList.get(i).topLeft.x), (int)game.rockList.get(i).topLeft.y, (int)game.rockList.get(i).width, (int)game.rockList.get(i).height, 50, 50);
+				}
+				
+				//draw blocks
+				for(int i = 0; i < game.blockList.size(); i++) {
+					g.setColor(BUCKET_COLOR);
+					g.fillRect((int)framePos.x + (int)game.blockList.get(i).topLeft.x, (int)game.blockList.get(i).topLeft.y, (int)game.blockList.get(i).width, (int)game.blockList.get(i).height);
+					if(game.blockList.get(i).width == game.spriteWidth && game.blockList.get(i).height == game.spriteHeight) {
+						g.setColor(Color.BLACK);
+						g.drawRect((int)framePos.x + (int)game.blockList.get(i).topLeft.x, (int)game.blockList.get(i).topLeft.y, game.spriteWidth, game.spriteHeight);
+					}
+				}
+				
+				//lift
+				for(int i = 0; i < game.liftList.size(); i++) {
+					g.setColor(Color.LIGHT_GRAY);
+					g.fillRect((int)(framePos.x + game.liftList.get(i).pos.x), (int)game.liftList.get(i).pos.y, (int)game.liftList.get(i).liftBlock.width, (int)game.liftList.get(i).liftBlock.height);
+				}
+				
+				//fireballs
+				for(int i = 0; i < game.fireList.size(); i++) {
+					createSprite(g, "sprites/fireball.png", framePos.x + (int)game.fireList.get(i).pos.x, (int)game.fireList.get(i).pos.y);
+				}
+				
+				//sand
+				for(int i = 0; i < game.sandList.size(); i++) {
+					g.setColor(SAND);
+					g.fillRoundRect((int)(framePos.x + game.sandList.get(i).topLeft.x), (int)game.sandList.get(i).topLeft.y, (int)game.sandList.get(i).width, (int)game.sandList.get(i).height, 20, 20);
+				}
+				
+				//magma
+				for(int i = 0; i < game.magmaList.size(); i++) {
+					g.setColor(MAGMA);
+					g.fillRect((int)(framePos.x + game.magmaList.get(i).topLeft.x), (int)game.magmaList.get(i).topLeft.y, (int)game.magmaList.get(i).width, (int)game.magmaList.get(i).height);
+				}
+				
+				//notes
+				for(int i = 0; i < game.noteList.size(); i++) {
+					g.setColor(Color.WHITE);
+					g.drawString(game.noteList.get(i).data, (int)(framePos.x + game.noteList.get(i).pos.x), (int)game.noteList.get(i).pos.y);
+				}
+				
+				//jetsuit
+				for(int i = 0; i < game.jetList.size(); i++) {
+					createSprite(g, "sprites/jetsuitleft.png", framePos.x + game.jetList.get(i).pos.x, game.jetList.get(i).pos.y);
+				}
+				
+				//suits
+				for(int i = 0; i < game.suitList.size(); i++) {
+					if(game.suitList.get(i).forward) {
+						if(game.strideSuitFrame == 1) {
+							createSprite(g, "sprites/suit1righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+						} else if(game.strideSuitFrame == 2) {
+							createSprite(g, "sprites/suit2righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+						} else if(game.strideSuitFrame == 3) {
+							createSprite(g, "sprites/suit3righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+						} else if(game.strideSuitFrame == 4) {
+							createSprite(g, "sprites/suit4righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+						} else {
+							createSprite(g, "sprites/suit1righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+						}
+					} else {
+						if(game.strideSuitFrame == 1) {
+							createSprite(g, "sprites/suit1lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+						} else if(game.strideSuitFrame == 2) {
+							createSprite(g, "sprites/suit2lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+						} else if(game.strideSuitFrame == 3) {
+							createSprite(g, "sprites/suit3lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+						} else if(game.strideSuitFrame == 4) {
+							createSprite(g, "sprites/suit4lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+						} else {
+							createSprite(g, "sprites/suit1lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+						}
+					}
+				}
+				for(int i = 0; i < game.tempSuit.size(); i++) {
+					if(game.tempSuit.get(i).forward) {
+						createImage(g, "sprites/deadsuitrighttrans.png", framePos.x + game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
+					} else {
+						createImage(g, "sprites/deadsuitlefttrans.png", framePos.x + game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
+					}
+				}
+				
+				//RUNNING ANIMATION (LEFT)
+				if(!game.mainChar.forward) {
+					//JUMPING ANIMATION
+					if(game.jumping || game.falling) {
+						createSprite(g, "sprites/misha2lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+					} else {
+						if(game.stride == 1) {
+							createSprite(g, "sprites/stride1lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						} else if(game.stride == 2) {
+							createSprite(g, "sprites/stride2lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						} else if(game.stride == 3) {
+							createSprite(g, "sprites/stride3lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						} else if(game.stride == 4) {
+							createSprite(g, "sprites/stride4lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						} else {
+							createSprite(g, "sprites/misha1lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						}
+					}
+				//RUNNING ANIMATION (RIGHT)
+				} else if(game.mainChar.forward) {
+					//JUMPING ANIMATION
+					if(game.jumping || game.falling) {
+						createSprite(g, "sprites/misha2righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+					} else {
+						if(game.stride == 1) {
+							createSprite(g, "sprites/stride1righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						} else if(game.stride == 2) {
+							createSprite(g, "sprites/stride2righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						} else if(game.stride == 3) {
+							createSprite(g, "sprites/stride3righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						} else if(game.stride == 4) {
+							createSprite(g, "sprites/stride4righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						} else {
+							createSprite(g, "sprites/misha1righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						}
+					}
+					
+				}
+				
+				String level = Integer.toString(game.level);
+				g.setColor(Color.WHITE);
+				g.drawString("level: " + level, (int)game.WIDTH - 50, 35);
+				String score = Double.toString(game.score);
+				g.drawString("score: " + score, (int)game.WIDTH - (5 * score.length()) - 50, 15);
+				
+//				g.fillRect((int)framePos.x + (int)game.door.topLeft.x, (int)game.door.topLeft.y, (int)game.door.width, (int)game.door.height);
+				createSprite(g, "sprites/exitStairs.png", (int)framePos.x + (int)game.door.topLeft.x, (int)game.door.topLeft.y);
+				//draw boss door
+				createImage(g, "sprites/fireExit.png", (int)framePos.x + (int)game.bossDoor.topLeft.x, (int)game.bossDoor.topLeft.y, 40, 80);
+			}
+			//draw counter
+			if(game.pregame) {
+				int countDown = game.count / 60;
+				g.drawString(Integer.toString(countDown), (int)game.WIDTH/2, (int)game.HEIGHT/2);
+			}
+
+		}
+		
+		//LEVELUP
+		if(game.levelUp) {
+			if(game.reset < 30) {
+				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.BLACK);
+				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.WHITE);
+				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+			} else if(game.reset > 30 && game.reset < 60) {
+				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.WHITE);
+				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.BLACK);
+				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+			} else if(game.reset > 60 && game.reset < 90) {
+				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.BLACK);
+				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.WHITE);
+				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+			} else if(game.reset > 90 && game.reset < 120) {
+				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.WHITE);
+				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.BLACK);
+				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+			} else if(game.reset > 120 && game.reset < 150) {
+				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.BLACK);
+				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.WHITE);
+				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+			} else if(game.reset > 150 && game.reset < 180) {
+				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.WHITE);
+				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.BLACK);
+				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+			}
+		}
+		
+		//DEATH______________________________
+		if(game.death) {
+//			//CLEAR AND FILL THE BACKGROUND
+//			g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+//			g.setColor(Color.BLACK);
+//			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+			g.setColor(Color.WHITE);
+			g.drawString("GAME OVER", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+		}
+		
+		if(game.highscoresInit) {
+			if(game.newHighScore) {
+				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.BLACK);
+				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.setColor(Color.WHITE);
+				g.drawString("ENTER YOUR NAME INTO THE CONSOLE", 300, 240);
+			}
+		}
+		
+		if(game.highscores) {
+			g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+			g.setColor(Color.BLACK);
+			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+			g.setColor(Color.WHITE);
+			for(int i = 0; i < game.scoresList.size(); i++) {
+				g.drawString(Integer.toString(i), 150, (10*i) + 50);
+				g.drawString(game.namesList.get(i), 200, (10*i) + 50);
+				g.drawString(Integer.toString(game.scoresList.get(i)), 250, (10*i) + 50);
+			}
+		}
+		g.dispose();
+	}
+	
+	public void createFire(Graphics g, Point top) {
+		int x = (int)top.x;
+		int y = (int)top.y;
+		Polygon p = new Polygon();
+		p.addPoint(x + 1, y + 1);
+		p.addPoint(x + 2, y + 4);
+		p.addPoint(x + 3, y);
+		p.addPoint(x + 4, y + 3);
+		p.addPoint(x + 6, y);
+		p.addPoint(x + 7, y + 2);
+		p.addPoint(x + 8, y);
+		p.addPoint(x + 10, y + 3);
+		p.addPoint(x + 11, y);
+		p.addPoint(x + 12, y + 4);
+		p.addPoint(x + 13, y + 1);
+		p.addPoint(x + 14, y + 5);
+		p.addPoint(x + 14, y + 8);
+		p.addPoint(x + 13, y + 11);
+		p.addPoint(x + 12, y + 13);
+		p.addPoint(x + 11, y + 14);
+		p.addPoint(x + 9, y + 15);
+		p.addPoint(x + 5, y + 15);
+		p.addPoint(x + 3,  y + 14);
+		p.addPoint(x + 2, y + 13);
+		p.addPoint(x + 1, y + 11);
+		p.addPoint(x, y + 8);
+		p.addPoint(x, y + 5);
+		g.setColor(Color.RED);
+		g.fillPolygon(p);
+	}
+	
+	public void createWindow(Graphics g, Rectangle window) {
+		g.setColor(Color.YELLOW);
+		Polygon p = new Polygon();
+		p.addPoint((int)window.topLeft.x, (int)(window.topLeft.y + (window.height)));
+		p.addPoint((int)(window.topLeft.x - (.5*window.width)), (int)(window.topLeft.y + (1.5* window.height)));
+		p.addPoint((int)(window.topLeft.x + (.5*window.width)), (int)(window.topLeft.y + (1.5* window.height)));
+		p.addPoint((int)(window.topLeft.x + window.width), (int)(window.topLeft.y + window.height));
+		g.fillPolygon(p);
+		
+		g.setColor(Color.GRAY);
+		g.fillRect((int)window.topLeft.x, (int)window.topLeft.y, (int)window.width, (int)window.height);
+		g.setColor(Color.BLUE);
+		g.fillRect((int)(window.topLeft.x + (window.width/8)), (int)(window.topLeft.y + (window.height/8)), (int)window.width/3, (int)window.height/3);
+		g.fillRect((int)(window.topLeft.x + 5*(window.width/8)), (int)(window.topLeft.y + (window.height/8)), (int)window.width/3, (int)window.height/3);
+		g.fillRect((int)(window.topLeft.x + (window.width/8)), (int)(window.topLeft.y + 5*(window.height/8)), (int)window.width/3, (int)window.height/3);
+		g.fillRect((int)(window.topLeft.x + 5*(window.width/8)), (int)(window.topLeft.y + 5*(window.height/8)), (int)window.width/3, (int)window.height/3);
+
+	}
+	
+	public void addBlock(Graphics g, Point topLeft) {
+		Rectangle block = new Rectangle(topLeft, game.WIDTH, game.HEIGHT);
+		createSprite(g, "files/block.jpg", topLeft.x, topLeft.y);
+		game.blockList.add(block);
+	}
+	
+	public void createTree(Graphics g, Point top) {
+		Polygon p = new Polygon();
+
+		p.addPoint((int)top.x, (int)top.y);
+		p.addPoint((int)top.x - 50, (int)top.y + 50);
+		p.addPoint((int)top.x - 25, (int)top.y + 50);
+		p.addPoint((int)top.x - 75, (int)top.y + 100);
+		p.addPoint((int)top.x - 50, (int)top.y + 100);
+		p.addPoint((int)top.x - 100, (int)top.y + 150);
+		p.addPoint((int)top.x + 100, (int)top.y + 150);
+		p.addPoint((int)top.x + 50, (int)top.y + 100);
+		p.addPoint((int)top.x + 75, (int)top.y + 100);
+		p.addPoint((int)top.x + 25, (int)top.y + 50);
+		p.addPoint((int)top.x + 50, (int)top.y + 50);
+
+		g.setColor(BACKGROUND_COLOR);
+		g.fillPolygon(p);
+		
+		g.setColor(TREE_TRUNK);
+		g.fillRect( (int)top.x - 12, (int)top.y + 150, 25, 50);
+	}
+	
+	public void createSprite(Graphics g, String imgPath, double x, double y) {
+		BufferedImage img = null;
+		File file = new File(imgPath);
+		try {
+			img = ImageIO.read(file);
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		ImageObserver observer = null;
+		g.drawImage(img, (int)x, (int)y, game.spriteWidth, 2*game.spriteHeight, observer);
+	}
+	
+	public void createImage(Graphics g, String imgPath, double x, double y, double width, double height) {
+		BufferedImage img = null;
+		File file = new File(imgPath);
+		try {
+			img = ImageIO.read(file);
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		ImageObserver observer = null;
+		g.drawImage(img, (int)x, (int)y, (int)width, (int)height, observer);
+	}
+}
