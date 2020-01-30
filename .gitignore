@@ -1,7 +1,9 @@
 src/main/resources/
 resources/
-
 target/
+bin/
+.settings/
+.classpath
 
 # Compiled class file
 *.class
