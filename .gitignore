@@ -1,6 +1,8 @@
 src/main/resources/
 resources/
 
+target/
+
 # Compiled class file
 *.class
 
