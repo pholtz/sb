@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -17,6 +18,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 
+import org.butternut.sb.level.Level;
 import org.butternut.sb.model.Character;
 import org.butternut.sb.model.Fire;
 import org.butternut.sb.model.Lift;
@@ -24,6 +26,8 @@ import org.butternut.sb.model.Note;
 import org.butternut.sb.model.Point;
 import org.butternut.sb.model.Rectangle;
 import org.butternut.sb.model.Suit;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Game
 {
@@ -205,29 +209,53 @@ public class Game
 		//GAME INIT___________________________
 		if(gameInit) {
 			if(level == 0) {
-	        	//stop menu music
-	        	clip.stop();
-				initMusic("src/main/resources/files/curejust.WAV");
-				clearlists();
-				mainChar.charPos.y = GROUND - spriteHeight;
-				for(int i = 0; i < 2*WIDTH; i += spriteWidth) {
-					addblock(i, HEIGHT - spriteHeight);
-					addblock(-20, i);
+				
+				ObjectMapper objectMapper = new ObjectMapper();
+				Level level = objectMapper.readValue(Paths.get("src/main/resources/0.json").toFile(), Level.class);
+				
+				this.clip.stop();
+				this.initMusic("src/main/resources/files/" + level.getMusic().get(0));
+				
+				this.clearlists();
+				this.mainChar.charPos.x = level.getCharacter().get(0);
+				this.mainChar.charPos.y = level.getCharacter().get(1);
+				
+				for(List<Object> note : level.getNotes()) {
+					this.noteList.add(new Note(new Point(Double.valueOf(String.valueOf(note.get(0))), Double.valueOf(String.valueOf(note.get(1)))), (String) note.get(2)));
 				}
-				noteList.add(new Note(new Point(100, 400), "move SB left and right with the arrow keys."));
-				noteList.add(new Note(new Point(100, 415), "press up to jump over the wall."));
-				addblock(200, HEIGHT - 2*spriteHeight);
-				addblock(200, HEIGHT - 3*spriteHeight);
-				addblock(200, HEIGHT - 4*spriteHeight);
-				addblock(200, HEIGHT - 5*spriteHeight);
-				noteList.add(new Note(new Point(300, 500), "this is a cold pop"));
-				noteList.add(new Note(new Point(300, 515), "you can pick them up for points"));
-				noteList.add(new Note(new Point(300, 530), "in addition to being delicious,"));
-				noteList.add(new Note(new Point(300, 545), "they may help you out later on your quest"));
-				coldpop(300, GROUND);
-				noteList.add(new Note(new Point(600, 500), "look for the exit signs to progress to lower floors of the apartment, but beware, the farther you go, the more enemies you'll encounter..."));
-				door.topLeft = new Point(1300, GROUND - spriteHeight);
-//				jetList.add(new Suit(new Point(300, 400), 200));
+				
+				for(List<Long> block : level.getBlocks()) {
+					this.addblock(block.get(0), block.get(1));
+				}
+				
+				for(List<Long> coldpop : level.getColdpops()) {
+					this.coldpop(coldpop.get(0), coldpop.get(1));
+				}
+				
+				this.door.topLeft = new Point(level.getDoor().get(0), level.getDoor().get(1));
+				
+//	        	//stop menu music
+//	        	clip.stop();
+//				initMusic("src/main/resources/files/curejust.WAV");
+//				clearlists();
+//				mainChar.charPos.y = GROUND - spriteHeight;
+//				for(int i = 0; i < 2*WIDTH; i += spriteWidth) {
+//					addblock(i, HEIGHT - spriteHeight);
+//					addblock(-20, i);
+//				}
+//				noteList.add(new Note(new Point(100, 400), "move SB left and right with the arrow keys."));
+//				noteList.add(new Note(new Point(100, 415), "press up to jump over the wall."));
+//				addblock(200, HEIGHT - 2*spriteHeight);
+//				addblock(200, HEIGHT - 3*spriteHeight);
+//				addblock(200, HEIGHT - 4*spriteHeight);
+//				addblock(200, HEIGHT - 5*spriteHeight);
+//				noteList.add(new Note(new Point(300, 500), "this is a cold pop"));
+//				noteList.add(new Note(new Point(300, 515), "you can pick them up for points"));
+//				noteList.add(new Note(new Point(300, 530), "in addition to being delicious,"));
+//				noteList.add(new Note(new Point(300, 545), "they may help you out later on your quest"));
+//				coldpop(300, GROUND);
+//				noteList.add(new Note(new Point(600, 500), "look for the exit signs to progress to lower floors of the apartment, but beware, the farther you go, the more enemies you'll encounter..."));
+//				door.topLeft = new Point(1300, GROUND - spriteHeight);
 			}
 			if(level == 1) {
 				clearlists();
