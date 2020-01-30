@@ -1,9 +1,10 @@
-package edu.ycp.ece220.rgb;
+package org.butternut.sb.model;
+
+import org.butternut.sb.Game;
 
 public class Character {
 
 	public Point charPos;
-//	private int coldPop;
 	private String sprite1, sprite2, sprite3;
 	public Rectangle charBlock;
 	public boolean forward;
@@ -13,7 +14,7 @@ public class Character {
 		this.sprite2 = in_sprite2;
 		this.sprite3 = in_sprite3;
 		this.charPos = in_charPos;
-		this.charBlock = new Rectangle(charPos, game.spriteWidth, 2*game.spriteHeight);
+		this.charBlock = new Rectangle(charPos, Game.spriteWidth, 2*Game.spriteHeight);
 		this.forward = true;
 	}
 	

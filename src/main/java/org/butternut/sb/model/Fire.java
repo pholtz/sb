@@ -1,4 +1,6 @@
-package edu.ycp.ece220.rgb;
+package org.butternut.sb.model;
+
+import org.butternut.sb.Game;
 
 public class Fire {
 
@@ -12,7 +14,7 @@ public class Fire {
 	 */
 	public Fire(Point inPos, int inRadius, boolean right) {
 		this.pos = inPos;
-		this.fireBlock = new Rectangle(this.pos, game.spriteWidth, 2*game.spriteHeight);
+		this.fireBlock = new Rectangle(this.pos, Game.spriteWidth, 2*Game.spriteHeight);
 		this.forward = right;
 		startPos = (int)inPos.x;
 		this.radius = inRadius;

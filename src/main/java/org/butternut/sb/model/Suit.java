@@ -1,4 +1,6 @@
-package edu.ycp.ece220.rgb;
+package org.butternut.sb.model;
+
+import org.butternut.sb.Game;
 
 public class Suit {
 
@@ -9,18 +11,9 @@ public class Suit {
 	
 	public Suit(Point inPos, int inRadius) {
 		this.pos = inPos;
-		this.suitBlock = new Rectangle(this.pos, game.spriteWidth, 2*game.spriteHeight);
+		this.suitBlock = new Rectangle(this.pos, Game.spriteWidth, 2*Game.spriteHeight);
 		this.forward = true;
 		this.radius = inRadius;
 		startPos = (int)inPos.x;
 	}
-	
-	/**
-	 * @param args
-	 */
-//	public static void main(String[] args) {
-//		// TODO Auto-generated method stub
-//
-//	}
-
 }

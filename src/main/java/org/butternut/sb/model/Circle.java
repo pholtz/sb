@@ -1,4 +1,4 @@
-package edu.ycp.ece220.rgb;
+package org.butternut.sb.model;
 
 /**
  * Class whose instances represent circles in the x/y plane.
@@ -8,8 +8,6 @@ package edu.ycp.ece220.rgb;
  * @author David Hovemeyer
  */
 public class Circle {
-	// TODO: add fields
-	//Circle myCircle;
 	Point center;
 	double radius;
 	/**
@@ -29,7 +27,6 @@ public class Circle {
 	 * @return the center point of the circle
 	 */
 	public Point getCenter() {
-		//throw new UnsupportedOperationException("TODO - implement");
 		Point center = this.center;
 		return center;
 	}
@@ -40,7 +37,6 @@ public class Circle {
 	 * @param center the (new) center point of the circle
 	 */
 	public void setCenter(Point center) {
-		//throw new UnsupportedOperationException("TODO - implement");
 		this.center = center;
 	}
 
@@ -50,7 +46,6 @@ public class Circle {
 	 * @return the current radius
 	 */
 	public double getRadius() {
-		//throw new UnsupportedOperationException("TODO - implement");
 		double radius = this.radius;
 		return radius;
 	}
@@ -61,7 +56,6 @@ public class Circle {
 	 * @param radius the (new) radius of the circle
 	 */
 	public void setRadius(double radius) {
-		//throw new UnsupportedOperationException("TODO - implement");
 		this.radius = radius;
 	}
 }

@@ -1,4 +1,4 @@
-package edu.ycp.ece220.rgb;
+package org.butternut.sb.level;
 
 public class Level {
 

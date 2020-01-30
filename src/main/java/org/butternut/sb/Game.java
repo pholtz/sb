@@ -1,36 +1,41 @@
-package edu.ycp.ece220.rgb;
+package org.butternut.sb;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
-import java.io.*;
 
-import javax.sound.sampled.*;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
 
-public class game {
-	/**
-	 * Width of the gameplay field.
-	 */
+import org.butternut.sb.model.Character;
+import org.butternut.sb.model.Fire;
+import org.butternut.sb.model.Lift;
+import org.butternut.sb.model.Note;
+import org.butternut.sb.model.Point;
+import org.butternut.sb.model.Rectangle;
+import org.butternut.sb.model.Suit;
+
+public class Game
+{
 	public static final double WIDTH = 900;
-	//default: 640 x 480 (w x h)
-	/**
-	 * Height of the gameplay field.
-	 */
 	public static final double HEIGHT = 660;
-	/**
-	 * height of the main char
-	 */
 	public static final int spriteHeight = 20;
-	/**
-	 * width of the main char
-	 */
 	public static final int spriteWidth = 20;
 	public static final int popHeight = 15;
 	public static final int popWidth = 10;
 	public static final double GROUND = HEIGHT - 2*spriteHeight;
-	// Fields
 	
-	private Random rand; // use this to generate random numbers
+	private Random random;
 	
 	public Rectangle door, bossDoor;
 	public Point startPoint, startcharPos;
@@ -86,22 +91,23 @@ public class game {
 	/**
 	 * Constructor: initialize the game state.
 	 * @throws IOException 
+	 * @throws URISyntaxException 
 	 */
-	public game() throws IOException {
+	public Game() throws IOException, URISyntaxException {
 		keyboard = new Scanner(System.in);
 		scoresList = new ArrayList<Integer>();
 		namesList = new ArrayList<String>();
-		scoresfile = new File("./files/scores.txt");
+		scoresfile = Paths.get("src/main/resources/files/scores.txt").toFile();
 		scoresfr = new FileReader(scoresfile);
 		scoresbr = new BufferedReader(scoresfr);
 		scoreswriter = new FileWriter(scoresfile);
-		namesfile = new File("./files/names.txt");
+		namesfile = Paths.get("src/main/resources/files/names.txt").toFile();
 		namesfr = new FileReader(namesfile);
 		namesbr = new BufferedReader(namesfr);
 		nameswriter = new FileWriter(namesfile);
 		nextSuitFrame = 0;
 		strideSuitFrame = 0;
-		rand = new Random(19580427);
+		random = new Random(19580427);
 		menu = false;
 		game = false;
 		boss = false;
@@ -118,7 +124,7 @@ public class game {
 		crawlInit = true;
 		crawl = true;
 		introPos = (int)HEIGHT;
-		mainChar = new Character("./sprites/mario1.png", "./sprites/mario2.png", "./sprites/mario3.png", startcharPos);
+		mainChar = new Character("src/main/resources/sprites/mario1.png", "src/main/resources/sprites/mario2.png", "src/main/resources/sprites/mario3.png", startcharPos);
 		blockList = new ArrayList<Rectangle>();
 		gameInit = false;
 		falling = false;
@@ -149,8 +155,15 @@ public class game {
 		score = 0;
 		bossDoor = new Rectangle(new Point(-160, 650), 2*spriteWidth, 4*spriteHeight);
 		pregame = false;
-		//which level to start?
 		level = 0;
+	}
+	
+	public static Game initialize() {
+		try {
+			return new Game();
+		} catch(Exception exception) {
+			throw new RuntimeException("Error while intializing game", exception);
+		}
 	}
 
 	/**
@@ -163,7 +176,7 @@ public class game {
 		
 		//CRAWL INIT____________________________
 		if(crawlInit) {
-			initAudio("./files/Star Wars.wav");
+			initAudio("src/main/resources/files/Star Wars.wav");
 			crawlInit = false;
 		}
 		
@@ -183,7 +196,7 @@ public class game {
 		
 		//MENU INIT____________________________
 		if(menuInit) {
-			initAudio("./files/blinkwhats.WAV");
+			initAudio("src/main/resources/files/blinkwhats.WAV");
 			menuInit = false;
 			menu = true;
 		}
@@ -194,7 +207,7 @@ public class game {
 			if(level == 0) {
 	        	//stop menu music
 	        	clip.stop();
-				initMusic("./files/curejust.WAV");
+				initMusic("src/main/resources/files/curejust.WAV");
 				clearlists();
 				mainChar.charPos.y = GROUND - spriteHeight;
 				for(int i = 0; i < 2*WIDTH; i += spriteWidth) {
@@ -394,7 +407,7 @@ public class game {
 					coldpop(i + 20, 500);
 					addblock(i + 40, 520);
 					coldpop(i + 40, 500);
-					addrock(i + 160, -rand.nextDouble()*1000);
+					addrock(i + 160, -random.nextDouble()*1000);
 				}
 				liftList.add(new Lift(new Rectangle(new Point(3420, GROUND), 100, 10), 150));
 				coldpop(3460, 200);
@@ -441,7 +454,7 @@ public class game {
 				clip.drain();
 				clip1.stop();
 				clip1.drain();
-				initMusic("./files/bbsabotage.WAV");
+				initMusic("src/main/resources/files/bbsabotage.WAV");
 				boss = true;
 				clearlists();
 				mainChar.charPos.x = -40;
@@ -656,7 +669,7 @@ public class game {
 					score += 10;
 					coldPop++;
 					popList.remove(i);
-					initAudio("files/coldpop.wav");
+					initAudio("src/main/resources/files/coldpop.wav");
 				}
 			}
 			
@@ -740,7 +753,6 @@ public class game {
 			for(int i = 0; i < blockList.size(); i++) {
 				//side collision
 				if(mainChar.charBlock.overlaps(blockList.get(i))) {
-					System.out.print("\n\n\nit's working\n\n\n");
 					walking = false;
 					break;
 				} else {
@@ -926,7 +938,7 @@ public class game {
 			if(mainChar.charBlock.overlaps(door) || mainChar.charBlock.overlaps(bossDoor)) {
 				game = false;
 				levelUp = true;
-				initAudio("files/doorOpen.wav");
+				initAudio("src/main/resources/files/doorOpen.wav");
 			}
 			
 		}
@@ -950,7 +962,7 @@ public class game {
 		
 		
 		if(deathInit) {
-			initAudio("files/fullbronch.wav");
+			initAudio("src/main/resources/files/fullbronch.wav");
 			deathInit = false;
 			death = true;
 		}
@@ -990,7 +1002,6 @@ public class game {
 					if(line == null) {
 						break;
 					}
-//					System.out.printf("\n%s", line);
 					int temp = Integer.parseInt(line);
 					scoresList.add(temp);
 				} catch (IOException e) {
@@ -1024,7 +1035,7 @@ public class game {
 		}
 		
 		//CONSOLE READOUT
-		System.out.printf("%f %f  %b\n", mainChar.charPos.x, mainChar.charPos.y, highscores);
+		// System.out.printf("%f %f  %b\n", mainChar.charPos.x, mainChar.charPos.y, highscores);
 		
 	}
 	

@@ -1,4 +1,4 @@
-package edu.ycp.ece220.rgb;
+package org.butternut.sb.model;
 
 /**
  * Class whose instances represent points in the x/y plane.
@@ -8,9 +8,6 @@ package edu.ycp.ece220.rgb;
  * @author David Hovemeyer
  */
 public class Point {
-	// TODO: add fields
-	//Point myPoint = new Point();
-	//Point myPoint;
 	public double x, y;
 	/**
 	 * Constructor.
@@ -19,10 +16,6 @@ public class Point {
 	 * @param y  the Point's y coordinate value
 	 */
 	public Point(double x, double y) {
-		//throw new UnsupportedOperationException("TODO - implement");
-//		x = myPoint.x;
-//		y = myPoint.y;
-//		myPoint = new Point(x, y);
 		this.x = x;
 		this.y = y;
 	}
@@ -33,7 +26,6 @@ public class Point {
 	 * @return the point's x coordinate value
 	 */
 	public double getX() {
-		//throw new UnsupportedOperationException("TODO - implement");
 		double xval = this.x;
 		return xval;
 	}
@@ -44,7 +36,6 @@ public class Point {
 	 * @return the point's y coordinate value
 	 */
 	public double getY() {
-		//throw new UnsupportedOperationException("TODO - implement");
 		double yval = this.y;
 		return yval;
 	}
@@ -57,7 +48,6 @@ public class Point {
 	 * @return the geometric distance between this point and the other point
 	 */
 	public double distanceTo(Point other) {
-		//throw new UnsupportedOperationException("TODO - implement");
 		double distance = Math.sqrt((other.getX() - this.x) * (other.getX() - this.x) + (other.getY() - this.y) * (other.getY() - this.y));
 		return distance;
 	}
@@ -79,6 +69,5 @@ public class Point {
 		double xval = (a * c) - (b * d);	
 		double yval = (b * c) + (a * d);
 		return  new Point(xval, yval);
-		//(ac - bd) + (bc + ad)
 	}
 }

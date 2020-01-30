@@ -1,4 +1,4 @@
-package edu.ycp.ece220.rgb;
+package org.butternut.sb.model;
 
 /**
  * Instances of this class represent rectangle with a given
@@ -12,10 +12,8 @@ package edu.ycp.ece220.rgb;
  * @author David Hovemeyer
  */
 public class Rectangle {
-	// TODO: add fields
-	//Rectangle myRectangle;
-	Point topLeft;
-	double width, height;
+	public Point topLeft;
+	public double width, height;
 	public int startHeight;
 	/**
 	 * Constructor.
@@ -25,7 +23,6 @@ public class Rectangle {
 	 * @param height  the height of the rectangle
 	 */
 	public Rectangle(Point topLeft, double width, double height) {
-		//throw new UnsupportedOperationException("TODO - implement");
 		this.topLeft = topLeft;
 		this.width = width;
 		this.height = height;
@@ -38,7 +35,6 @@ public class Rectangle {
 	 * @return the top left point of the rectangle
 	 */
 	public Point getTopLeft() {
-		//throw new UnsupportedOperationException("TODO - implement");
 		Point topLeft = this.topLeft;
 		return topLeft;
 	}
@@ -49,7 +45,6 @@ public class Rectangle {
 	 * @param topLeft the (new) top left point of the rectangle
 	 */
 	public void setTopLeft(Point topLeft) {
-		//throw new UnsupportedOperationException("TODO - implement");
 		this.topLeft = topLeft;
 	}
 	
@@ -59,7 +54,6 @@ public class Rectangle {
 	 * @return the current width of the rectangle
 	 */
 	public double getWidth() {
-		//throw new UnsupportedOperationException("TODO - implement");
 		double width = this.width;
 		return width;
 	}
@@ -70,7 +64,6 @@ public class Rectangle {
 	 * @param width the (new) width of the rectangle
 	 */
 	public void setWidth(double width) {
-		//throw new UnsupportedOperationException("TODO - implement");
 		this.width = width;
 	}
 	
@@ -80,7 +73,6 @@ public class Rectangle {
 	 * @return the current height of the rectangle
 	 */
 	public double getHeight() {
-		//throw new UnsupportedOperationException("TODO - implement");
 		double height = this.height;
 		return height;
 	}
@@ -91,18 +83,8 @@ public class Rectangle {
 	 * @param height the (new) height of the rectangle
 	 */
 	public void setHeight(double height) {
-		//how new UnsupportedOperationException("TODO - implement");
 		this.height = height;
 	}
-	
-//	public boolean isInside(Point point) {
-//		if(point.x > this.topLeft.x && point.x < (this.topLeft.x + this.width)) {
-//			if(point.y > this.topLeft.y && point.y < (this.topLeft.y + this.height)) {
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
 	
 	public boolean isStandingOn(Rectangle block) {
 		if((-this.topLeft.x + this.width) >= block.topLeft.x && -this.topLeft.x <= (block.topLeft.x + block.width)) {
@@ -122,17 +104,6 @@ public class Rectangle {
 		}
 		return false;
 	}
-	
-//	public boolean collisionFromSide(Rectangle block) {
-//		if((-this.topLeft.x) < block.topLeft.x + 1 && (-this.topLeft.x) > block.topLeft.x - 1) {
-//			if((this.topLeft.y > block.topLeft.y + block.height - 1) && (this.topLeft.y < block.topLeft.y + block.height + 1)) {
-//				return true;
-//			} else if((this.topLeft.y + this.height > block.topLeft.y - 1) && (this.topLeft.y + this.height < block.topLeft.y + 1)) {
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
 	
 	public boolean overlaps(Rectangle block) {
 		//from left
@@ -177,12 +148,7 @@ public class Rectangle {
 	 * @return true if the circle completely or partially overlaps the rectangle,
 	 *         false if there is no overlap
 	 */
-	//@SuppressWarnings("null")
 	public boolean overlaps(Circle circle) {
-		//throw new UnsupportedOperationException("TODO - implement");
-		//initialize corners of rectangle
-//		boolean does_overlap = false;
-//		int count = 0;
 		Point topRight = new Point (0, 0), botLeft = new Point (0, 0), botRight = new Point (0, 0);
 		topRight.x = this.topLeft.x + this.width;
 		topRight.y = this.topLeft.y;

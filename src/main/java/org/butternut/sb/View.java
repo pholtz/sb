@@ -1,4 +1,4 @@
-package edu.ycp.ece220.rgb;
+package org.butternut.sb;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -18,6 +18,9 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import org.butternut.sb.model.Point;
+import org.butternut.sb.model.Rectangle;
+
 /**
  * KaboomView is the GUI panel class.
  * It draws a picture of each frame of animation based on the
@@ -25,21 +28,18 @@ import javax.swing.Timer;
  * and updates the game state based on the user input.
  * @param <keyListener>
  */
-public class sbview extends JPanel {
+public class View extends JPanel
+{
 	private static final long serialVersionUID = 1L;
 	private static final Color BACKGROUND_COLOR = new Color(0, 127, 0);
-	private static final Color BUCKET_COLOR = new Color(/*139*/92, /*69*/64, /*19*/51);
+	private static final Color BUCKET_COLOR = new Color(92, 64, 51);
 	private static final Color TREE_TRUNK = new Color(139, 69, 19);
 	private static final Color MAGMA = new Color(128, 20, 20);
 	private static final Color SAND = new Color(255, 178, 102);
 	private static final Color ROCK = new Color(160, 160, 160);
-//	private static final Color BOMBER_COLOR = Color.WHITE;
-//	private static final Color BOMB_COLOR = Color.BLACK;
 	
-	// The game object contains all of the game state data.
-	private game game;
-	
-	// TODO: add any other fields you need
+	private Game game;
+
 	int x, y;
 	Point mouse;
 	
@@ -48,10 +48,10 @@ public class sbview extends JPanel {
 	 * 
 	 * @param game the Game object representing the game state
 	 */
-	public sbview(game game) {
+	public View(Game game) {
 		this.game = game;
 		setBackground(BACKGROUND_COLOR);
-		setPreferredSize(new Dimension((int)game.WIDTH, (int)game.HEIGHT));
+		setPreferredSize(new Dimension((int) Game.WIDTH, (int) Game.HEIGHT));
 		mouse = new Point(0, 0);
 	}
 	
@@ -69,7 +69,6 @@ public class sbview extends JPanel {
 				try {
 					handleTimerEvent();
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
@@ -133,12 +132,9 @@ public class sbview extends JPanel {
 	
     private void myKeyEvt(KeyEvent e, String text) {
         int key = e.getKeyCode();
-//        System.out.println("TEST");
         if(game.game) {
             if (key == KeyEvent.VK_KP_LEFT || key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)
             {
-//                System.out.println(text + " LEFT");
-                //Call some function
                 if(text.contains("Pressed") || text.contains("Typed")) {
                     game.left = true;
                 } else if(text.contains("Released")) {
@@ -148,8 +144,6 @@ public class sbview extends JPanel {
             }
             else if (key == KeyEvent.VK_KP_RIGHT || key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D)
             {
-//                System.out.println(text + " RIGHT");
-                //Call some function
                 if(text.contains("Pressed") || text.contains("Typed")) {
                 	game.right = true;
                 } else if(text.contains("Released")) {
@@ -169,7 +163,7 @@ public class sbview extends JPanel {
         	
         	//reset charPos for new game
         	game.mainChar.charPos.x = 0;
-        	game.mainChar.charPos.y = (int)game.HEIGHT - 2*game.spriteHeight;
+        	game.mainChar.charPos.y = (int)Game.HEIGHT - 2*Game.spriteHeight;
         	
         }
         
@@ -194,9 +188,7 @@ public class sbview extends JPanel {
 	}
 	
 	protected void handleMouseMove(MouseEvent e) {
-		// TODO: handle mouse movement
 		if(game.menu) {
-//			System.out.printf("\nit made it here at least");
 			x = e.getX();
 			y = e.getY();
 			mouse.x = x;
@@ -211,41 +203,34 @@ public class sbview extends JPanel {
 		//CRAWL______________________________
 		if(game.crawl) {
 			g.setColor(Color.BLACK);
-			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
-			createImage(g, "./files/intro.png", ((int)game.WIDTH/2) - 130, game.introPos, 263, 514);
+			g.fillRect(0, 0, (int) Game.WIDTH, (int) Game.HEIGHT);
+			createImage(g, "src/main/resources/files/intro.png", ((int) Game.WIDTH/2) - 130, game.introPos, 263, 514);
 		}
 		
 		//MENU_______________________________
 		if(game.menu) {
 			g.setColor(Color.BLACK);
-			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
-			createImage(g, "./files/sb2.png", 0, 0, game.WIDTH, game.HEIGHT); 
+			g.fillRect(0, 0, (int) Game.WIDTH, (int) Game.HEIGHT);
+			createImage(g, "src/main/resources/files/sb2.png", 0, 0, Game.WIDTH, Game.HEIGHT); 
 		}
-		
-//		if(game.gameInit) {
-//			g.setColor(Color.BLACK);
-//			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
-//			g.drawString("Level 1", (int)(game.WIDTH / 2.1), (int)(game.HEIGHT / 2.1));
-//		}
 
 		//GAME_______________________________
 		if(game.game || game.pregame) {
 			
 			//CLEAR AND FILL THE BACKGROUND
-			g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+			g.clearRect(0, 0, (int) Game.WIDTH, (int) Game.HEIGHT);
 			g.setColor(Color.BLACK);
-			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+			g.fillRect(0, 0, (int) Game.WIDTH, (int) Game.HEIGHT);
 
 			//ESTABLISH NEW FRAMEPOS BASED ON X-COORD OF CHARPOS
-			Point framePos = new Point(game.mainChar.charPos.x + game.WIDTH/2, game.mainChar.charPos.y);
+			Point framePos = new Point(game.mainChar.charPos.x + Game.WIDTH/2, game.mainChar.charPos.y);
 			
-			if(-game.mainChar.charPos.x < game.WIDTH/2 || game.boss) {	//beginning of level (let user get to middle of screen -- no scroll)
+			if(-game.mainChar.charPos.x < Game.WIDTH/2 || game.boss) {	//beginning of level (let user get to middle of screen -- no scroll)
 				
 				//draw foreground
-//				createTree(g, new Point(250, 260));	//values are static because this is the beginning of the level (char isn't midscreen yet)
 				g.setColor(Color.DARK_GRAY);
-				for(int x = 0; x < game.WIDTH; x += 40) {
-					for(int y = 0; y < game.HEIGHT; y += 20) {
+				for(int x = 0; x < Game.WIDTH; x += 40) {
+					for(int y = 0; y < Game.HEIGHT; y += 20) {
 						if((y/20) % 2 == 0) {
 							g.drawRect(x, y, 40, 20);
 						} else {
@@ -275,9 +260,9 @@ public class sbview extends JPanel {
 				for(int i = 0; i < game.blockList.size(); i++) {
 					g.setColor(BUCKET_COLOR);
 					g.fillRect((int)game.blockList.get(i).topLeft.x, (int)game.blockList.get(i).topLeft.y, (int)game.blockList.get(i).width, (int)game.blockList.get(i).height);
-					if(game.blockList.get(i).width == game.spriteWidth && game.blockList.get(i).height == game.spriteHeight) {
+					if(game.blockList.get(i).width == Game.spriteWidth && game.blockList.get(i).height == Game.spriteHeight) {
 						g.setColor(Color.BLACK);
-						g.drawRect((int)game.blockList.get(i).topLeft.x, (int)game.blockList.get(i).topLeft.y, game.spriteWidth, game.spriteHeight);
+						g.drawRect((int)game.blockList.get(i).topLeft.x, (int)game.blockList.get(i).topLeft.y, Game.spriteWidth, Game.spriteHeight);
 					}
 				}
 				
@@ -307,54 +292,50 @@ public class sbview extends JPanel {
 				
 				//fireballs
 				for(int i = 0; i < game.fireList.size(); i++) {
-//					createSprite(g, "sprites/fireball.png", (int)game.fireList.get(i).pos.x, (int)game.fireList.get(i).pos.y);
-//					g.setColor(Color.RED);
-//					g.fillArc((int)game.fireList.get(i).pos.x, (int)game.fireList.get(i).pos.y, game.spriteWidth, 2*game.spriteHeight, 180, 180);
 					g.setColor(Color.RED);
-					g.fillRoundRect((int)game.fireList.get(i).pos.x, (int)game.fireList.get(i).pos.y, game.spriteWidth, 2*game.spriteHeight, 5000, 2000);
+					g.fillRoundRect((int)game.fireList.get(i).pos.x, (int)game.fireList.get(i).pos.y, Game.spriteWidth, 2*Game.spriteHeight, 5000, 2000);
 					g.setColor(Color.ORANGE);
-					g.fillRoundRect((int)game.fireList.get(i).pos.x + 5, (int)game.fireList.get(i).pos.y + 5, game.spriteWidth - 10, 2*game.spriteHeight - 10, 5000, 2000);
-//					createFire(g, new Point((int)game.fireList.get(i).pos.x + 10, (int)game.fireList.get(i).pos.y - 15));
+					g.fillRoundRect((int)game.fireList.get(i).pos.x + 5, (int)game.fireList.get(i).pos.y + 5, Game.spriteWidth - 10, 2*Game.spriteHeight - 10, 5000, 2000);
 				}
 				
 				//jetsuit
 				for(int i = 0; i < game.jetList.size(); i++) {
-					createSprite(g, "./sprites/jetsuitleft.png", game.jetList.get(i).pos.x, game.jetList.get(i).pos.y);
+					createSprite(g, "src/main/resources/sprites/jetsuitleft.png", game.jetList.get(i).pos.x, game.jetList.get(i).pos.y);
 				}
 				
 				//suits
 				for(int i = 0; i < game.suitList.size(); i++) {
 					if(game.suitList.get(i).forward) {
 						if(game.strideSuitFrame == 1) {
-							createImage(g, "./sprites/suit1righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+							createImage(g, "src/main/resources/sprites/suit1righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
 						} else if(game.strideSuitFrame == 2) {
-							createImage(g, "./sprites/suit2righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+							createImage(g, "src/main/resources/sprites/suit2righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
 						} else if(game.strideSuitFrame == 3) {
-							createImage(g, "./sprites/suit3righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+							createImage(g, "src/main/resources/sprites/suit3righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
 						} else if(game.strideSuitFrame == 4) {
-							createImage(g, "./sprites/suit4righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+							createImage(g, "src/main/resources/sprites/suit4righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
 						} else {
-							createImage(g, "./sprites/suit1righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+							createImage(g, "src/main/resources/sprites/suit1righttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
 						}
 					} else {
 						if(game.strideSuitFrame == 1) {
-							createImage(g, "./sprites/suit1lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+							createImage(g, "src/main/resources/sprites/suit1lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
 						} else if(game.strideSuitFrame == 2) {
-							createImage(g, "./sprites/suit2lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+							createImage(g, "src/main/resources/sprites/suit2lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
 						} else if(game.strideSuitFrame == 3) {
-							createImage(g, "./sprites/suit3lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+							createImage(g, "src/main/resources/sprites/suit3lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
 						} else if(game.strideSuitFrame == 4) {
-							createImage(g, "./sprites/suit4lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+							createImage(g, "src/main/resources/sprites/suit4lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
 						} else {
-							createImage(g, "./sprites/suit1lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
+							createImage(g, "src/main/resources/sprites/suit1lefttrans.png", game.suitList.get(i).pos.x, game.suitList.get(i).pos.y, game.suitList.get(i).suitBlock.width,game.suitList.get(i).suitBlock.height);
 						}
 					}
 				}
 				for(int i = 0; i < game.tempSuit.size(); i++) {
 					if(game.tempSuit.get(i).forward) {
-						createImage(g, "./sprites/deadsuitrighttrans.png", game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
+						createImage(g, "src/main/resources/sprites/deadsuitrighttrans.png", game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
 					} else {
-						createImage(g, "./sprites/deadsuitlefttrans.png", game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
+						createImage(g, "src/main/resources/sprites/deadsuitlefttrans.png", game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
 					}
 				}
 
@@ -362,36 +343,36 @@ public class sbview extends JPanel {
 				if(!game.mainChar.forward) {
 					//JUMPING ANIMATION
 					if(game.jumping || game.falling) {
-						createSprite(g, "./sprites/misha2lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						createSprite(g, "src/main/resources/sprites/misha2lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 					} else {
 						if(game.stride == 1) {
-							createSprite(g, "./sprites/stride1lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride1lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 						} else if(game.stride == 2) {
-							createSprite(g, "./sprites/stride2lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride2lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 						} else if(game.stride == 3) {
-							createSprite(g, "./sprites/stride3lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride3lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 						} else if(game.stride == 4) {
-							createSprite(g, "./sprites/stride4lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride4lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 						} else {
-							createSprite(g, "./sprites/misha1lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/misha1lefttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 						}
 					}
 				//RUNNING ANIMATION (RIGHT)
 				} else if(game.mainChar.forward) {
 					//JUMPING ANIMATION
 					if(game.jumping || game.falling) {
-						createSprite(g, "./sprites/misha2righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+						createSprite(g, "src/main/resources/sprites/misha2righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 					} else {
 						if(game.stride == 1) {
-							createSprite(g, "./sprites/stride1righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride1righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 						} else if(game.stride == 2) {
-							createSprite(g, "./sprites/stride2righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride2righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 						} else if(game.stride == 3) {
-							createSprite(g, "./sprites/stride3righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride3righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 						} else if(game.stride == 4) {
-							createSprite(g, "./sprites/stride4righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride4righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 						} else {
-							createSprite(g, "./sprites/misha1righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/misha1righttrans.png", -game.mainChar.charPos.x, game.mainChar.charPos.y);
 						}
 					}
 					
@@ -400,23 +381,20 @@ public class sbview extends JPanel {
 				//draw level counter
 				String level = Integer.toString(game.level);
 				g.setColor(Color.WHITE);
-				g.drawString("level: " + level, (int)game.WIDTH - 50, (int)35);
+				g.drawString("level: " + level, (int)Game.WIDTH - 50, (int)35);
 				String score = Double.toString(game.score);
-				g.drawString("score: " + score, (int)game.WIDTH - (5 * score.length()) - 50, 15);
+				g.drawString("score: " + score, (int)Game.WIDTH - (5 * score.length()) - 50, 15);
 				//draw exit door
-				createSprite(g, "./sprites/exitStairs.png", (int)game.door.topLeft.x, (int)game.door.topLeft.y);
+				createSprite(g, "src/main/resources/sprites/exitStairs.png", (int)game.door.topLeft.x, (int)game.door.topLeft.y);
 				//draw boss door
-				createImage(g, "./sprites/fireExit.png", (int)game.bossDoor.topLeft.x, (int)game.bossDoor.topLeft.y, 40, 80);
+				createImage(g, "src/main/resources/sprites/fireExit.png", (int)game.bossDoor.topLeft.x, (int)game.bossDoor.topLeft.y, 40, 80);
 				
 			} else {	//normal mid screen scroll
 				
 				//draw foreground
-				
-//				createTree(g, new Point(framePos.x + 250, 260));	//IMPORTANT: x-term allows tree to scroll with bg!!!
-//				createTree(g, new Point(framePos.x + 750, 260));
 				g.setColor(Color.DARK_GRAY);
-				for(int x = 0; x < 10*game.WIDTH; x += 40) {
-					for(int y = 0; y < game.HEIGHT; y += 20) {
+				for(int x = 0; x < 10*Game.WIDTH; x += 40) {
+					for(int y = 0; y < Game.HEIGHT; y += 20) {
 						if((y/20) % 2 == 0) {
 							g.drawRect((int)(framePos.x + x), y, 40, 20);
 						} else {
@@ -457,9 +435,9 @@ public class sbview extends JPanel {
 				for(int i = 0; i < game.blockList.size(); i++) {
 					g.setColor(BUCKET_COLOR);
 					g.fillRect((int)framePos.x + (int)game.blockList.get(i).topLeft.x, (int)game.blockList.get(i).topLeft.y, (int)game.blockList.get(i).width, (int)game.blockList.get(i).height);
-					if(game.blockList.get(i).width == game.spriteWidth && game.blockList.get(i).height == game.spriteHeight) {
+					if(game.blockList.get(i).width == Game.spriteWidth && game.blockList.get(i).height == Game.spriteHeight) {
 						g.setColor(Color.BLACK);
-						g.drawRect((int)framePos.x + (int)game.blockList.get(i).topLeft.x, (int)game.blockList.get(i).topLeft.y, game.spriteWidth, game.spriteHeight);
+						g.drawRect((int)framePos.x + (int)game.blockList.get(i).topLeft.x, (int)game.blockList.get(i).topLeft.y, Game.spriteWidth, Game.spriteHeight);
 					}
 				}
 				
@@ -471,7 +449,7 @@ public class sbview extends JPanel {
 				
 				//fireballs
 				for(int i = 0; i < game.fireList.size(); i++) {
-					createSprite(g, "sprites/fireball.png", framePos.x + (int)game.fireList.get(i).pos.x, (int)game.fireList.get(i).pos.y);
+					createSprite(g, "src/main/resources/spritess/fireball.png", framePos.x + (int)game.fireList.get(i).pos.x, (int)game.fireList.get(i).pos.y);
 				}
 				
 				//sand
@@ -494,42 +472,42 @@ public class sbview extends JPanel {
 				
 				//jetsuit
 				for(int i = 0; i < game.jetList.size(); i++) {
-					createSprite(g, "sprites/jetsuitleft.png", framePos.x + game.jetList.get(i).pos.x, game.jetList.get(i).pos.y);
+					createSprite(g, "src/main/resources/sprites/jetsuitleft.png", framePos.x + game.jetList.get(i).pos.x, game.jetList.get(i).pos.y);
 				}
 				
 				//suits
 				for(int i = 0; i < game.suitList.size(); i++) {
 					if(game.suitList.get(i).forward) {
 						if(game.strideSuitFrame == 1) {
-							createSprite(g, "sprites/suit1righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+							createSprite(g, "src/main/resources/sprites/suit1righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
 						} else if(game.strideSuitFrame == 2) {
-							createSprite(g, "sprites/suit2righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+							createSprite(g, "src/main/resources/sprites/suit2righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
 						} else if(game.strideSuitFrame == 3) {
-							createSprite(g, "sprites/suit3righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+							createSprite(g, "src/main/resources/sprites/suit3righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
 						} else if(game.strideSuitFrame == 4) {
-							createSprite(g, "sprites/suit4righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+							createSprite(g, "src/main/resources/sprites/suit4righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
 						} else {
-							createSprite(g, "sprites/suit1righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+							createSprite(g, "src/main/resources/sprites/suit1righttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
 						}
 					} else {
 						if(game.strideSuitFrame == 1) {
-							createSprite(g, "sprites/suit1lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+							createSprite(g, "src/main/resources/sprites/suit1lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
 						} else if(game.strideSuitFrame == 2) {
-							createSprite(g, "sprites/suit2lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+							createSprite(g, "src/main/resources/sprites/suit2lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
 						} else if(game.strideSuitFrame == 3) {
-							createSprite(g, "sprites/suit3lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+							createSprite(g, "src/main/resources/sprites/suit3lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
 						} else if(game.strideSuitFrame == 4) {
-							createSprite(g, "sprites/suit4lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+							createSprite(g, "src/main/resources/sprites/suit4lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
 						} else {
-							createSprite(g, "sprites/suit1lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
+							createSprite(g, "src/main/resources/sprites/suit1lefttrans.png", framePos.x + game.suitList.get(i).pos.x, game.suitList.get(i).pos.y);
 						}
 					}
 				}
 				for(int i = 0; i < game.tempSuit.size(); i++) {
 					if(game.tempSuit.get(i).forward) {
-						createImage(g, "sprites/deadsuitrighttrans.png", framePos.x + game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
+						createImage(g, "src/main/resources/sprites/deadsuitrighttrans.png", framePos.x + game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
 					} else {
-						createImage(g, "sprites/deadsuitlefttrans.png", framePos.x + game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
+						createImage(g, "src/main/resources/sprites/deadsuitlefttrans.png", framePos.x + game.tempSuit.get(i).pos.x, game.tempSuit.get(i).pos.y, game.tempSuit.get(i).suitBlock.width, game.tempSuit.get(i).suitBlock.height);
 					}
 				}
 				
@@ -537,36 +515,36 @@ public class sbview extends JPanel {
 				if(!game.mainChar.forward) {
 					//JUMPING ANIMATION
 					if(game.jumping || game.falling) {
-						createSprite(g, "sprites/misha2lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						createSprite(g, "src/main/resources/sprites/misha2lefttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 					} else {
 						if(game.stride == 1) {
-							createSprite(g, "sprites/stride1lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride1lefttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 						} else if(game.stride == 2) {
-							createSprite(g, "sprites/stride2lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride2lefttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 						} else if(game.stride == 3) {
-							createSprite(g, "sprites/stride3lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride3lefttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 						} else if(game.stride == 4) {
-							createSprite(g, "sprites/stride4lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride4lefttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 						} else {
-							createSprite(g, "sprites/misha1lefttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/misha1lefttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 						}
 					}
 				//RUNNING ANIMATION (RIGHT)
 				} else if(game.mainChar.forward) {
 					//JUMPING ANIMATION
 					if(game.jumping || game.falling) {
-						createSprite(g, "sprites/misha2righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+						createSprite(g, "src/main/resources/sprites/misha2righttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 					} else {
 						if(game.stride == 1) {
-							createSprite(g, "sprites/stride1righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride1righttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 						} else if(game.stride == 2) {
-							createSprite(g, "sprites/stride2righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride2righttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 						} else if(game.stride == 3) {
-							createSprite(g, "sprites/stride3righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride3righttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 						} else if(game.stride == 4) {
-							createSprite(g, "sprites/stride4righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/stride4righttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 						} else {
-							createSprite(g, "sprites/misha1righttrans.png", game.WIDTH/2, game.mainChar.charPos.y);
+							createSprite(g, "src/main/resources/sprites/misha1righttrans.png", Game.WIDTH/2, game.mainChar.charPos.y);
 						}
 					}
 					
@@ -574,19 +552,19 @@ public class sbview extends JPanel {
 				
 				String level = Integer.toString(game.level);
 				g.setColor(Color.WHITE);
-				g.drawString("level: " + level, (int)game.WIDTH - 50, 35);
+				g.drawString("level: " + level, (int)Game.WIDTH - 50, 35);
 				String score = Double.toString(game.score);
-				g.drawString("score: " + score, (int)game.WIDTH - (5 * score.length()) - 50, 15);
+				g.drawString("score: " + score, (int)Game.WIDTH - (5 * score.length()) - 50, 15);
 				
 //				g.fillRect((int)framePos.x + (int)game.door.topLeft.x, (int)game.door.topLeft.y, (int)game.door.width, (int)game.door.height);
-				createSprite(g, "sprites/exitStairs.png", (int)framePos.x + (int)game.door.topLeft.x, (int)game.door.topLeft.y);
+				createSprite(g, "src/main/resources/sprites/exitStairs.png", (int)framePos.x + (int)game.door.topLeft.x, (int)game.door.topLeft.y);
 				//draw boss door
-				createImage(g, "sprites/fireExit.png", (int)framePos.x + (int)game.bossDoor.topLeft.x, (int)game.bossDoor.topLeft.y, 40, 80);
+				createImage(g, "src/main/resources/sprites/fireExit.png", (int)framePos.x + (int)game.bossDoor.topLeft.x, (int)game.bossDoor.topLeft.y, 40, 80);
 			}
 			//draw counter
 			if(game.pregame) {
 				int countDown = game.count / 60;
-				g.drawString(Integer.toString(countDown), (int)game.WIDTH/2, (int)game.HEIGHT/2);
+				g.drawString(Integer.toString(countDown), (int)Game.WIDTH/2, (int)Game.HEIGHT/2);
 			}
 
 		}
@@ -594,68 +572,65 @@ public class sbview extends JPanel {
 		//LEVELUP
 		if(game.levelUp) {
 			if(game.reset < 30) {
-				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.clearRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.BLACK);
-				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.fillRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.WHITE);
-				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+				g.drawString("LEVEL CLEAR", (int)Game.WIDTH/2, (int)Game.HEIGHT/2);
 			} else if(game.reset > 30 && game.reset < 60) {
-				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.clearRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.WHITE);
-				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.fillRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.BLACK);
-				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+				g.drawString("LEVEL CLEAR", (int)Game.WIDTH/2, (int)Game.HEIGHT/2);
 			} else if(game.reset > 60 && game.reset < 90) {
-				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.clearRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.BLACK);
-				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.fillRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.WHITE);
-				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+				g.drawString("LEVEL CLEAR", (int)Game.WIDTH/2, (int)Game.HEIGHT/2);
 			} else if(game.reset > 90 && game.reset < 120) {
-				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.clearRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.WHITE);
-				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.fillRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.BLACK);
-				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+				g.drawString("LEVEL CLEAR", (int)Game.WIDTH/2, (int)Game.HEIGHT/2);
 			} else if(game.reset > 120 && game.reset < 150) {
-				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.clearRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.BLACK);
-				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.fillRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.WHITE);
-				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+				g.drawString("LEVEL CLEAR", (int)Game.WIDTH/2, (int)Game.HEIGHT/2);
 			} else if(game.reset > 150 && game.reset < 180) {
-				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.clearRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.WHITE);
-				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.fillRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.BLACK);
-				g.drawString("LEVEL CLEAR", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+				g.drawString("LEVEL CLEAR", (int)Game.WIDTH/2, (int)Game.HEIGHT/2);
 			}
 		}
 		
 		//DEATH______________________________
 		if(game.death) {
 //			//CLEAR AND FILL THE BACKGROUND
-//			g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
-//			g.setColor(Color.BLACK);
-//			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
 			g.setColor(Color.WHITE);
-			g.drawString("GAME OVER", (int)game.WIDTH/2, (int)game.HEIGHT/2);
+			g.drawString("GAME OVER", (int)Game.WIDTH/2, (int)Game.HEIGHT/2);
 		}
 		
 		if(game.highscoresInit) {
 			if(game.newHighScore) {
-				g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.clearRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.BLACK);
-				g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+				g.fillRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 				g.setColor(Color.WHITE);
 				g.drawString("ENTER YOUR NAME INTO THE CONSOLE", 300, 240);
 			}
 		}
 		
 		if(game.highscores) {
-			g.clearRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+			g.clearRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 			g.setColor(Color.BLACK);
-			g.fillRect(0, 0, (int)game.WIDTH, (int)game.HEIGHT);
+			g.fillRect(0, 0, (int)Game.WIDTH, (int)Game.HEIGHT);
 			g.setColor(Color.WHITE);
 			for(int i = 0; i < game.scoresList.size(); i++) {
 				g.drawString(Integer.toString(i), 150, (10*i) + 50);
@@ -717,7 +692,7 @@ public class sbview extends JPanel {
 	}
 	
 	public void addBlock(Graphics g, Point topLeft) {
-		Rectangle block = new Rectangle(topLeft, game.WIDTH, game.HEIGHT);
+		Rectangle block = new Rectangle(topLeft, Game.WIDTH, Game.HEIGHT);
 		createSprite(g, "files/block.jpg", topLeft.x, topLeft.y);
 		game.blockList.add(block);
 	}
@@ -753,7 +728,7 @@ public class sbview extends JPanel {
 			e.printStackTrace();
 		}
 		ImageObserver observer = null;
-		g.drawImage(img, (int)x, (int)y, game.spriteWidth, 2*game.spriteHeight, observer);
+		g.drawImage(img, (int)x, (int)y, Game.spriteWidth, 2*Game.spriteHeight, observer);
 	}
 	
 	public void createImage(Graphics g, String imgPath, double x, double y, double width, double height) {
