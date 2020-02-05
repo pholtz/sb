@@ -9,6 +9,7 @@ public class Level
 	private List<Long> character;
 	private List<List<Object>> notes;
 	private List<List<Long>> coldpops;
+	private List<List<Long>> suits;
 	private List<Long> door;
 	private List<List<Long>> blocks;
 	
@@ -41,6 +42,12 @@ public class Level
 	}
 	public void setColdpops(List<List<Long>> coldpops) {
 		this.coldpops = coldpops;
+	}
+	public List<List<Long>> getSuits() {
+		return suits;
+	}
+	public void setSuits(List<List<Long>> suits) {
+		this.suits = suits;
 	}
 	public List<Long> getDoor() {
 		return door;

@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -19,6 +20,7 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 
 import org.butternut.sb.level.Level;
+import org.butternut.sb.level.LevelLoader;
 import org.butternut.sb.model.Character;
 import org.butternut.sb.model.Fire;
 import org.butternut.sb.model.Lift;
@@ -26,8 +28,6 @@ import org.butternut.sb.model.Note;
 import org.butternut.sb.model.Point;
 import org.butternut.sb.model.Rectangle;
 import org.butternut.sb.model.Suit;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Game
 {
@@ -39,17 +39,24 @@ public class Game
 	public static final int popWidth = 10;
 	public static final double GROUND = HEIGHT - 2*spriteHeight;
 	
+	// Immutable dependencies
+	private final LevelLoader levelLoader;
+	
+	// Mutable observable state
+	public int levelCounter;
+	public Point cursor;
+	
 	private Random random;
 	
 	public Rectangle door, bossDoor;
 	public Point startPoint, startcharPos;
 	public boolean menu, game, walking, jumping, gravity, left, right, pregame,
 	menuInit, crawl, crawlInit, gameInit, falling, death, deathInit, suitDeath, highscoresInit, newHighScore, highscores, boss;
-	public int next, jumpTime, introPos, level, stride, timer, flameCount;
+	public int next, jumpTime, introPos, stride, timer, flameCount;
 	double g, reset, score, coldPop, suitG;
 	public boolean levelUp;
 	
-	Character mainChar;
+	public Character mainChar;
 	Fire fire1;
 	ArrayList<Suit> tempSuit;
 	
@@ -70,7 +77,7 @@ public class Game
     AudioInputStream stream;
     AudioFormat format;
     DataLine.Info info;
-    Clip clip = null;
+    public Clip clip = null;
     
     File yourFile1;
     AudioInputStream stream1;
@@ -98,6 +105,10 @@ public class Game
 	 * @throws URISyntaxException 
 	 */
 	public Game() throws IOException, URISyntaxException {
+		this.levelLoader = new LevelLoader();
+		this.levelCounter = 0;
+		this.cursor = Point.of(0, 0);
+		
 		keyboard = new Scanner(System.in);
 		scoresList = new ArrayList<Integer>();
 		namesList = new ArrayList<String>();
@@ -159,7 +170,6 @@ public class Game
 		score = 0;
 		bossDoor = new Rectangle(new Point(-160, 650), 2*spriteWidth, 4*spriteHeight);
 		pregame = false;
-		level = 0;
 	}
 	
 	public static Game initialize() {
@@ -208,118 +218,39 @@ public class Game
 		
 		//GAME INIT___________________________
 		if(gameInit) {
-			if(level == 0) {
+			Optional.ofNullable(this.clip).ifPresent(Clip::stop);
+			Optional.ofNullable(this.clip1).ifPresent(Clip::stop);
+			this.clearlists();
+			this.mainChar.charPos = Point.of(0, 0);
+			
+			if(levelCounter == 0 || levelCounter == 1) {
 				
-				ObjectMapper objectMapper = new ObjectMapper();
-				Level level = objectMapper.readValue(Paths.get("src/main/resources/0.json").toFile(), Level.class);
+				Level level = this.levelLoader.load(String.valueOf(this.levelCounter) + ".json");
 				
-				this.clip.stop();
 				this.initMusic("src/main/resources/files/" + level.getMusic().get(0));
 				
-				this.clearlists();
-				this.mainChar.charPos.x = level.getCharacter().get(0);
-				this.mainChar.charPos.y = level.getCharacter().get(1);
+				this.mainChar.charPos = Point.of(level.getCharacter().get(0), level.getCharacter().get(1));
 				
-				for(List<Object> note : level.getNotes()) {
+				for(List<Object> note : Optional.ofNullable(level.getNotes()).orElse(new ArrayList<>())) {
 					this.noteList.add(new Note(new Point(Double.valueOf(String.valueOf(note.get(0))), Double.valueOf(String.valueOf(note.get(1)))), (String) note.get(2)));
 				}
 				
-				for(List<Long> block : level.getBlocks()) {
+				for(List<Long> block : Optional.ofNullable(level.getBlocks()).orElse(new ArrayList<>())) {
 					this.addblock(block.get(0), block.get(1));
 				}
 				
-				for(List<Long> coldpop : level.getColdpops()) {
+				for(List<Long> coldpop : Optional.ofNullable(level.getColdpops()).orElse(new ArrayList<>())) {
 					this.coldpop(coldpop.get(0), coldpop.get(1));
 				}
 				
+				for(List<Long> suit : Optional.ofNullable(level.getSuits()).orElse(new ArrayList<>())) {
+					this.suitList.add(new Suit(new Point(suit.get(0), suit.get(1)), 50));
+				}
+				
 				this.door.topLeft = new Point(level.getDoor().get(0), level.getDoor().get(1));
-				
-//	        	//stop menu music
-//	        	clip.stop();
-//				initMusic("src/main/resources/files/curejust.WAV");
-//				clearlists();
-//				mainChar.charPos.y = GROUND - spriteHeight;
-//				for(int i = 0; i < 2*WIDTH; i += spriteWidth) {
-//					addblock(i, HEIGHT - spriteHeight);
-//					addblock(-20, i);
-//				}
-//				noteList.add(new Note(new Point(100, 400), "move SB left and right with the arrow keys."));
-//				noteList.add(new Note(new Point(100, 415), "press up to jump over the wall."));
-//				addblock(200, HEIGHT - 2*spriteHeight);
-//				addblock(200, HEIGHT - 3*spriteHeight);
-//				addblock(200, HEIGHT - 4*spriteHeight);
-//				addblock(200, HEIGHT - 5*spriteHeight);
-//				noteList.add(new Note(new Point(300, 500), "this is a cold pop"));
-//				noteList.add(new Note(new Point(300, 515), "you can pick them up for points"));
-//				noteList.add(new Note(new Point(300, 530), "in addition to being delicious,"));
-//				noteList.add(new Note(new Point(300, 545), "they may help you out later on your quest"));
-//				coldpop(300, GROUND);
-//				noteList.add(new Note(new Point(600, 500), "look for the exit signs to progress to lower floors of the apartment, but beware, the farther you go, the more enemies you'll encounter..."));
-//				door.topLeft = new Point(1300, GROUND - spriteHeight);
-			}
-			if(level == 1) {
-				clearlists();
-				for(double i = 0; i < 2*WIDTH; i+= spriteWidth) {
-					blockList.add(new Rectangle(new Point(i, HEIGHT - spriteHeight), spriteWidth, spriteHeight));
-//					blockList.add(new Rectangle(new Point(i, 0), spriteWidth, spriteHeight));
-				}
-				
-				for(double i = spriteHeight; i < HEIGHT - spriteHeight; i+= spriteHeight) {
-					addblock(-20, i);
-					blockList.add(new Rectangle(new Point(300, i), spriteWidth, spriteHeight));
-//					blockList.add(new Rectangle(new Point(i, 0), spriteWidth, spriteHeight));
-				}
-
-
-				blockList.add(new Rectangle(new Point(50, 500), spriteWidth, spriteHeight));
-				popList.add(new Rectangle(new Point(55, 480), popWidth, popHeight));
-				blockList.add(new Rectangle(new Point(225, 400), spriteWidth, spriteHeight));
-				popList.add(new Rectangle(new Point(230, 380), popWidth, popHeight));
-				blockList.add(new Rectangle(new Point(150, 250), spriteWidth, spriteHeight));
-				popList.add(new Rectangle(new Point(155, 230), popWidth, popHeight));
-				blockList.add(new Rectangle(new Point(50, 150), spriteWidth, spriteHeight));
-				popList.add(new Rectangle(new Point(55, 130), popWidth, popHeight));
-				blockList.add(new Rectangle(new Point(250, 50), spriteWidth, spriteHeight));
-				popList.add(new Rectangle(new Point(255, 30), popWidth, popHeight));
-				
-				blockList.add(new Rectangle(new Point(250, 50), spriteWidth, spriteHeight));
-				door.topLeft = new Point(1760, GROUND - spriteHeight);
-				addblock(1780, GROUND);
-				addblock(1780, GROUND - spriteHeight);
-				addblock(1780, GROUND - 2*spriteHeight);
-				addblock(1780, GROUND - 3*spriteHeight);
-				addblock(1760, GROUND - 4*spriteHeight);
-				addblock(1760, GROUND - 5*spriteHeight);
-				addblock(1760, GROUND - 6*spriteHeight);
-				addblock(1740, GROUND - 7*spriteHeight);
-				addblock(1740, GROUND - 8*spriteHeight);
-				addblock(1720, GROUND - 9*spriteHeight);
-				addblock(1700, GROUND - 10*spriteHeight);
-				addblock(1680, GROUND - 11*spriteHeight);
-				addblock(1660, GROUND - 11*spriteHeight);
-				addblock(1640, GROUND - 12*spriteHeight);
-				addblock(1620, GROUND - 12*spriteHeight);
-				addblock(1600, GROUND - 12*spriteHeight);
-				addblock(1580, GROUND - 13*spriteHeight);
-				addblock(1560, GROUND - 13*spriteHeight);
-				addblock(1540, GROUND - 13*spriteHeight);
-				addblock(1520, GROUND - 13*spriteHeight);
-				
-				suitList.add(new Suit(new Point(900, GROUND - spriteHeight), 50));
-				coldpop(920, 440);
-				coldpop(1000, 400);
-				coldpop(1200, GROUND);
-				for(double i = HEIGHT - spriteHeight; i > 420; i-= spriteHeight) {
-					blockList.add(new Rectangle(new Point(1000, i), spriteWidth, spriteHeight));
-//					blockList.add(new Rectangle(new Point(i, 0), spriteWidth, spriteHeight));
-				}
-				for(int i = 340; i > 0; i -= spriteHeight) {
-					addblock(1000, i);
-				}
-				addblock(980, 340);
 			}
 			
-			if(level == 2) {
+			if(levelCounter == 2) {
 				clearlists();
 				for(double i = 0; i < 2*WIDTH; i+= spriteWidth) {
 					blockList.add(new Rectangle(new Point(i, HEIGHT - spriteHeight), spriteWidth, spriteHeight));
@@ -350,7 +281,7 @@ public class Game
 				door.topLeft.x = 800;
 			}
 			
-			if(level == 3) {
+			if(levelCounter == 3) {
 				clearlists();
 				for(double i = 0; i < 200; i+= spriteWidth) {
 					addblock(i, HEIGHT - spriteHeight);
@@ -411,7 +342,7 @@ public class Game
 				addblock(300, 160);
 			}
 			
-			if(level == 4) {
+			if(levelCounter == 4) {
 				clearlists();
 				mainChar.charPos.y = 100;
 				for(int i = 200; i < 300; i += spriteWidth) {
@@ -477,7 +408,7 @@ public class Game
 				bossDoor.topLeft = new Point(6020, 350);
 			}
 			
-			if(level == 5) {
+			if(levelCounter == 5) {
 				clip.stop();
 				clip.drain();
 				clip1.stop();
@@ -506,7 +437,7 @@ public class Game
 				liftList.add(new Lift(new Rectangle(new Point(365, GROUND), 80, 10), 300));
 			}
 			
-			if(level == 6) {
+			if(levelCounter == 6) {
 				boss = false;
 				clearlists();
 				for(double i = 0; i < WIDTH/2; i += spriteWidth) {
@@ -564,7 +495,7 @@ public class Game
 				addblock(3900, 200);
 			}
 			
-			if(level == 7) {
+			if(levelCounter == 7) {
 				clearlists();
 				for(int i = 0; i < 2*WIDTH; i += spriteWidth) {
 					addblock(i, HEIGHT - spriteHeight);
@@ -626,7 +557,7 @@ public class Game
 			count = 0;
 			pregame = true;
 			
-			if(level == 10) {
+			if(levelCounter == 10) {
 				game = false;
 				highscoresInit = true;
 			}
@@ -974,7 +905,7 @@ public class Game
 		if(levelUp) {
 			reset++;
 			if(reset > 180) {
-				level++;
+				this.levelCounter++;
 				levelUp = false;
 				gameInit = true;
 				reset = 0;

@@ -20,24 +20,16 @@ public class Point {
 		this.y = y;
 	}
 	
-	/**
-	 * Return the point's x coordinate value.
-	 * 
-	 * @return the point's x coordinate value
-	 */
-	public double getX() {
-		double xval = this.x;
-		return xval;
+	public static Point of(double x, double y) {
+		return new Point(x, y);
 	}
 	
-	/**
-	 * Return the point's y coordinate value
-	 * 
-	 * @return the point's y coordinate value
-	 */
+	public double getX() {
+		return x;
+	}
+	
 	public double getY() {
-		double yval = this.y;
-		return yval;
+		return y;
 	}
 
 	/**

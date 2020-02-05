@@ -6,18 +6,18 @@ import java.awt.Graphics;
 import java.awt.Polygon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
-import java.awt.event.KeyEvent;
+
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import org.butternut.sb.input.KeyController;
+import org.butternut.sb.input.MouseController;
 import org.butternut.sb.model.Point;
 import org.butternut.sb.model.Rectangle;
 
@@ -38,21 +38,28 @@ public class View extends JPanel
 	private static final Color SAND = new Color(255, 178, 102);
 	private static final Color ROCK = new Color(160, 160, 160);
 	
-	private Game game;
+	private final Game game;
+	private final MouseController mouseController;
+	private final KeyController keyController;
 
-	int x, y;
-	Point mouse;
+	private int x;
+	private int y;
+	private Point mouse = new Point(0, 0);
 	
 	/**
 	 * Constructor.
 	 * 
 	 * @param game the Game object representing the game state
 	 */
-	public View(Game game) {
+	public View(Game game,
+			MouseController mouseController,
+			KeyController keyController) {
 		this.game = game;
-		setBackground(BACKGROUND_COLOR);
-		setPreferredSize(new Dimension((int) Game.WIDTH, (int) Game.HEIGHT));
-		mouse = new Point(0, 0);
+		this.mouseController = mouseController;
+		this.keyController = keyController;
+		
+		this.setBackground(BACKGROUND_COLOR);
+		this.setPreferredSize(new Dimension((int) Game.WIDTH, (int) Game.HEIGHT));
 	}
 	
 	/**
@@ -74,112 +81,11 @@ public class View extends JPanel
 			}
 		});
 		timer.start();
-		
-		
-		// Add a listener for mouse motion.
-		// Each time the mouse is moved, the handleMouseMove method
-		// will be called.
-		addMouseMotionListener(new MouseAdapter() {
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				handleMouseMove(e);
-			}
-		});
-
-	    setFocusable(true);
-	    requestFocusInWindow();
-	    
-	    addKeyListener(new KeyAdapter() {
-	    	
-	    	@Override
-	    	public void keyPressed(KeyEvent e) {
-	    		jumpEvent(e);
-	    	}
-	    		
-		});
-
-	    addKeyListener(new KeyAdapter() {
-
-	    	@Override
-	        public void keyTyped(KeyEvent e) {
-	    		myKeyEvt(e, "keyTyped");
-	        }
-
-	        @Override
-	        public void keyPressed(KeyEvent e) {
-	           myKeyEvt(e, "keyPressed");
-	        }
-	        
-	    	@Override
-	        public void keyReleased(KeyEvent e) {
-	        	myKeyEvt(e, "keyReleased");
-	        }
-
-	    });
-	    
+		super.addMouseMotionListener(this.mouseController);
+		super.addKeyListener(this.keyController);
+	    super.setFocusable(true);
+	    super.requestFocusInWindow();
 	}
-
-	private void jumpEvent(KeyEvent e) {
-		int key = e.getKeyCode();
-        if(key == KeyEvent.VK_KP_UP || key == KeyEvent.VK_UP || key == KeyEvent.VK_SPACE || key == KeyEvent.VK_W) {
-        	if(!game.falling) {
-//        		System.out.printf("up");
-        		game.jumping = true;
-        	}
-        }
-        repaint();
-	}
-	
-    private void myKeyEvt(KeyEvent e, String text) {
-        int key = e.getKeyCode();
-        if(game.game) {
-            if (key == KeyEvent.VK_KP_LEFT || key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)
-            {
-                if(text.contains("Pressed") || text.contains("Typed")) {
-                    game.left = true;
-                } else if(text.contains("Released")) {
-                    game.left = false;
-                }
-                game.walking = true;
-            }
-            else if (key == KeyEvent.VK_KP_RIGHT || key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D)
-            {
-                if(text.contains("Pressed") || text.contains("Typed")) {
-                	game.right = true;
-                } else if(text.contains("Released")) {
-                	game.right = false;
-                }
-                game.walking = true;
-            } else if(key == KeyEvent.VK_EQUALS) {
-            	game.levelUp = true;
-            }
-        }
-        
-        if(key == KeyEvent.VK_1 && game.menu) {
-        	
-        	//if '1' is pressed, exit menu and launch gameInit
-        	game.menu = false;
-        	game.gameInit = true;
-        	
-        	//reset charPos for new game
-        	game.mainChar.charPos.x = 0;
-        	game.mainChar.charPos.y = (int)Game.HEIGHT - 2*Game.spriteHeight;
-        	
-        }
-        
-        if(key == KeyEvent.VK_Q && game.crawl) {
-        	
-        	//stop crawl music
-        	game.clip.stop();
-        	
-        	//if 'q' is pressed, exit crawl and launch menuInit
-        	game.menuInit = true;
-        	game.crawl = false;
-        	
-        }
-        
-        repaint();
-     }
 	
 	protected void handleTimerEvent() throws IOException {
 		// You should not need to change this method.
@@ -379,7 +285,7 @@ public class View extends JPanel
 				}
 				
 				//draw level counter
-				String level = Integer.toString(game.level);
+				String level = Integer.toString(game.levelCounter);
 				g.setColor(Color.WHITE);
 				g.drawString("level: " + level, (int)Game.WIDTH - 50, (int)35);
 				String score = Double.toString(game.score);
@@ -550,7 +456,7 @@ public class View extends JPanel
 					
 				}
 				
-				String level = Integer.toString(game.level);
+				String level = Integer.toString(game.levelCounter);
 				g.setColor(Color.WHITE);
 				g.drawString("level: " + level, (int)Game.WIDTH - 50, 35);
 				String score = Double.toString(game.score);
