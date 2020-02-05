@@ -16,7 +16,6 @@ public class KeyController implements KeyListener
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		this.runCompositeEvent(e, "Typed");
 	}
 
 	@Override
@@ -26,39 +25,6 @@ public class KeyController implements KeyListener
         	if(!this.game.falling) {
         		this.game.jumping = true;
         	}
-        }
-        this.runCompositeEvent(e, "Pressed");
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		this.runCompositeEvent(e, "Released");
-	}
-	
-	// TODO: Get rid of this hot garbage
-	private void runCompositeEvent(KeyEvent e, String text) {
-        int key = e.getKeyCode();
-        if(game.game) {
-            if (key == KeyEvent.VK_KP_LEFT || key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)
-            {
-                if(text.contains("Pressed") || text.contains("Typed")) {
-                    game.left = true;
-                } else if(text.contains("Released")) {
-                    game.left = false;
-                }
-                game.walking = true;
-            }
-            else if (key == KeyEvent.VK_KP_RIGHT || key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D)
-            {
-                if(text.contains("Pressed") || text.contains("Typed")) {
-                	game.right = true;
-                } else if(text.contains("Released")) {
-                	game.right = false;
-                }
-                game.walking = true;
-            } else if(key == KeyEvent.VK_EQUALS) {
-            	game.levelUp = true;
-            }
         }
         
         if(key == KeyEvent.VK_1 && game.menu) {
@@ -80,6 +46,40 @@ public class KeyController implements KeyListener
         	game.menuInit = true;
         	game.crawl = false;
         	
+        }
+        
+        if(game.game) {
+            if (key == KeyEvent.VK_KP_LEFT || key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)
+            {
+                game.left = true;
+                game.walking = true;
+            }
+            else if (key == KeyEvent.VK_KP_RIGHT || key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D)
+            {
+                game.right = true;
+                game.walking = true;
+            } else if(key == KeyEvent.VK_EQUALS) {
+            	game.levelUp = true;
+            }
+        }
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		int key = e.getKeyCode();
+        if(game.game) {
+            if (key == KeyEvent.VK_KP_LEFT || key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)
+            {
+                game.left = false;
+                game.walking = true;
+            }
+            else if (key == KeyEvent.VK_KP_RIGHT || key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D)
+            {
+                game.right = false;
+                game.walking = true;
+            } else if(key == KeyEvent.VK_EQUALS) {
+            	game.levelUp = true;
+            }
         }
 	}
 }
