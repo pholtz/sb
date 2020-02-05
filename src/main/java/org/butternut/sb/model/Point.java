@@ -25,11 +25,18 @@ public class Point {
 	}
 	
 	public double getX() {
-		return x;
+		double xval = this.x;
+		return xval;
 	}
-	
+
+	/**
+	 * Return the point's y coordinate value
+	 * 
+	 * @return the point's y coordinate value
+	 */
 	public double getY() {
-		return y;
+		double yval = this.y;
+		return yval;
 	}
 
 	/**

@@ -222,6 +222,7 @@ public class Game
 			Optional.ofNullable(this.clip1).ifPresent(Clip::stop);
 			this.clearlists();
 			this.mainChar.charPos = Point.of(0, 0);
+			this.mainChar.charBlock.topLeft = this.mainChar.charPos;
 			
 			if(levelCounter == 0 || levelCounter == 1) {
 				
@@ -230,6 +231,7 @@ public class Game
 				this.initMusic("src/main/resources/files/" + level.getMusic().get(0));
 				
 				this.mainChar.charPos = Point.of(level.getCharacter().get(0), level.getCharacter().get(1));
+				this.mainChar.charBlock.topLeft = this.mainChar.charPos;
 				
 				for(List<Object> note : Optional.ofNullable(level.getNotes()).orElse(new ArrayList<>())) {
 					this.noteList.add(new Note(new Point(Double.valueOf(String.valueOf(note.get(0))), Double.valueOf(String.valueOf(note.get(1)))), (String) note.get(2)));
@@ -711,6 +713,16 @@ public class Game
 			//BLOCKLIST COLLISION CHECK
 			for(int i = 0; i < blockList.size(); i++) {
 				//side collision
+				System.out.println(String.format("Player %s %s %s %s overlaps block %s %s %s %s -> %s",
+						String.valueOf(this.mainChar.charPos.x),
+						String.valueOf(this.mainChar.charPos.y),
+						String.valueOf(this.mainChar.charBlock.height),
+						String.valueOf(this.mainChar.charBlock.width),
+						String.valueOf(this.blockList.get(i).topLeft.x),
+						String.valueOf(this.blockList.get(i).topLeft.y),
+						String.valueOf(this.blockList.get(i).height),
+						String.valueOf(this.blockList.get(i).width),
+						String.valueOf(mainChar.charBlock.overlaps(blockList.get(i)))));
 				if(mainChar.charBlock.overlaps(blockList.get(i))) {
 					walking = false;
 					break;
