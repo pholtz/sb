@@ -7,9 +7,9 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import org.butternut.sb.io.KeyController;
-import org.butternut.sb.io.MouseController;
-import org.butternut.sb.time.AnimationController;
+import org.butternut.sb.input.KeyController;
+import org.butternut.sb.input.MouseController;
+import org.butternut.sb.state.StateController;
 
 public class Application
 {
@@ -18,7 +18,7 @@ public class Application
 			@Override
 			public void run() {
 				Game game = Game.initialize();
-				AnimationController animationController = new AnimationController(game);
+				StateController stateController = new StateController(game);
 				MouseController mouseController = new MouseController(game);
 				KeyController keyController = new KeyController(game);
 				View view = new View(game,
@@ -36,7 +36,7 @@ public class Application
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						game.timerTick();
-						animationController.processTimestep();
+						stateController.processTimestep();
 						view.repaint();
 					}
 				});

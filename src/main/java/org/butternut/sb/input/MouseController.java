@@ -1,4 +1,4 @@
-package org.butternut.sb.io;
+package org.butternut.sb.input;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;

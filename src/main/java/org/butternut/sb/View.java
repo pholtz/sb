@@ -12,11 +12,11 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-import org.butternut.sb.io.KeyController;
-import org.butternut.sb.io.MouseController;
+import org.butternut.sb.input.KeyController;
+import org.butternut.sb.input.MouseController;
 import org.butternut.sb.model.Point;
 import org.butternut.sb.model.Rectangle;
-import org.butternut.sb.model.State;
+import org.butternut.sb.state.State;
 
 /**
  * KaboomView is the GUI panel class.

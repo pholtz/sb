@@ -27,8 +27,8 @@ import org.butternut.sb.model.Lift;
 import org.butternut.sb.model.Note;
 import org.butternut.sb.model.Point;
 import org.butternut.sb.model.Rectangle;
-import org.butternut.sb.model.State;
 import org.butternut.sb.model.Suit;
+import org.butternut.sb.state.State;
 
 public class Game
 {
@@ -108,7 +108,7 @@ public class Game
 	 */
 	public Game() throws IOException, URISyntaxException {
 		this.levelLoader = new LevelLoader();
-		this.state = State.PRECRAWL;
+		this.state = State.CRAWL;
 		this.levelCounter = 0;
 		this.cursor = Point.of(0, 0);
 		
