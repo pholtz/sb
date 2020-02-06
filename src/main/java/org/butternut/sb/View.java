@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Polygon;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.File;
@@ -13,14 +11,12 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
-import javax.swing.Timer;
 
 import org.butternut.sb.io.KeyController;
 import org.butternut.sb.io.MouseController;
 import org.butternut.sb.model.Point;
 import org.butternut.sb.model.Rectangle;
 import org.butternut.sb.model.State;
-import org.butternut.sb.time.TimestepController;
 
 /**
  * KaboomView is the GUI panel class.
@@ -34,64 +30,28 @@ public class View extends JPanel
 	private static final long serialVersionUID = 1L;
 	private static final Color BACKGROUND_COLOR = new Color(0, 127, 0);
 	private static final Color BUCKET_COLOR = new Color(92, 64, 51);
-	private static final Color TREE_TRUNK = new Color(139, 69, 19);
 	private static final Color MAGMA = new Color(128, 20, 20);
 	private static final Color SAND = new Color(255, 178, 102);
 	private static final Color ROCK = new Color(160, 160, 160);
 	
 	private final Game game;
-	private final TimestepController controller;
 	private final MouseController mouseController;
 	private final KeyController keyController;
 	
-	/**
-	 * Constructor.
-	 * 
-	 * @param game the Game object representing the game state
-	 */
 	public View(Game game,
-			TimestepController controller,
 			MouseController mouseController,
 			KeyController keyController) {
 		this.game = game;
-		this.controller = controller;
 		this.mouseController = mouseController;
 		this.keyController = keyController;
 		
 		this.setBackground(BACKGROUND_COLOR);
 		this.setPreferredSize(new Dimension((int) Game.WIDTH, (int) Game.HEIGHT));
-	}
-	
-	/**
-	 * Start the game.
-	 */
-	public void startGame() {
-		// Create the animation timer.
-		// It will fire an event about 60 times per second.
-		// Every time a timer event fires the handleTimerEvent method
-		// will be called.
-		Timer timer = new Timer(1000 / 60, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					handleTimerEvent();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
-		});
-		timer.start();
+		
 		super.addMouseMotionListener(this.mouseController);
 		super.addKeyListener(this.keyController);
 	    super.setFocusable(true);
 	    super.requestFocusInWindow();
-	}
-	
-	protected void handleTimerEvent() throws IOException {
-		// You should not need to change this method.
-		game.timerTick();
-		this.controller.timestep();
-		repaint();
 	}
 	
 	@Override
@@ -537,38 +497,7 @@ public class View extends JPanel
 		g.dispose();
 	}
 	
-	public void createFire(Graphics g, Point top) {
-		int x = (int)top.x;
-		int y = (int)top.y;
-		Polygon p = new Polygon();
-		p.addPoint(x + 1, y + 1);
-		p.addPoint(x + 2, y + 4);
-		p.addPoint(x + 3, y);
-		p.addPoint(x + 4, y + 3);
-		p.addPoint(x + 6, y);
-		p.addPoint(x + 7, y + 2);
-		p.addPoint(x + 8, y);
-		p.addPoint(x + 10, y + 3);
-		p.addPoint(x + 11, y);
-		p.addPoint(x + 12, y + 4);
-		p.addPoint(x + 13, y + 1);
-		p.addPoint(x + 14, y + 5);
-		p.addPoint(x + 14, y + 8);
-		p.addPoint(x + 13, y + 11);
-		p.addPoint(x + 12, y + 13);
-		p.addPoint(x + 11, y + 14);
-		p.addPoint(x + 9, y + 15);
-		p.addPoint(x + 5, y + 15);
-		p.addPoint(x + 3,  y + 14);
-		p.addPoint(x + 2, y + 13);
-		p.addPoint(x + 1, y + 11);
-		p.addPoint(x, y + 8);
-		p.addPoint(x, y + 5);
-		g.setColor(Color.RED);
-		g.fillPolygon(p);
-	}
-	
-	public void createWindow(Graphics g, Rectangle window) {
+	private void createWindow(Graphics g, Rectangle window) {
 		g.setColor(Color.YELLOW);
 		Polygon p = new Polygon();
 		p.addPoint((int)window.topLeft.x, (int)(window.topLeft.y + (window.height)));
@@ -587,35 +516,7 @@ public class View extends JPanel
 
 	}
 	
-	public void addBlock(Graphics g, Point topLeft) {
-		Rectangle block = new Rectangle(topLeft, Game.WIDTH, Game.HEIGHT);
-		createSprite(g, "files/block.jpg", topLeft.x, topLeft.y);
-		game.blockList.add(block);
-	}
-	
-	public void createTree(Graphics g, Point top) {
-		Polygon p = new Polygon();
-
-		p.addPoint((int)top.x, (int)top.y);
-		p.addPoint((int)top.x - 50, (int)top.y + 50);
-		p.addPoint((int)top.x - 25, (int)top.y + 50);
-		p.addPoint((int)top.x - 75, (int)top.y + 100);
-		p.addPoint((int)top.x - 50, (int)top.y + 100);
-		p.addPoint((int)top.x - 100, (int)top.y + 150);
-		p.addPoint((int)top.x + 100, (int)top.y + 150);
-		p.addPoint((int)top.x + 50, (int)top.y + 100);
-		p.addPoint((int)top.x + 75, (int)top.y + 100);
-		p.addPoint((int)top.x + 25, (int)top.y + 50);
-		p.addPoint((int)top.x + 50, (int)top.y + 50);
-
-		g.setColor(BACKGROUND_COLOR);
-		g.fillPolygon(p);
-		
-		g.setColor(TREE_TRUNK);
-		g.fillRect( (int)top.x - 12, (int)top.y + 150, 25, 50);
-	}
-	
-	public void createSprite(Graphics g, String imgPath, double x, double y) {
+	private void createSprite(Graphics g, String imgPath, double x, double y) {
 		BufferedImage img = null;
 		File file = new File(imgPath);
 		try {
@@ -627,7 +528,7 @@ public class View extends JPanel
 		g.drawImage(img, (int)x, (int)y, Game.spriteWidth, 2*Game.spriteHeight, observer);
 	}
 	
-	public void createImage(Graphics g, String imgPath, double x, double y, double width, double height) {
+	private void createImage(Graphics g, String imgPath, double x, double y, double width, double height) {
 		BufferedImage img = null;
 		File file = new File(imgPath);
 		try {

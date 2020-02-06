@@ -1,11 +1,15 @@
 package org.butternut.sb;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import org.butternut.sb.io.KeyController;
 import org.butternut.sb.io.MouseController;
-import org.butternut.sb.time.TimestepController;
+import org.butternut.sb.time.AnimationController;
 
 public class Application
 {
@@ -14,11 +18,10 @@ public class Application
 			@Override
 			public void run() {
 				Game game = Game.initialize();
-				TimestepController controller = new TimestepController(game);
+				AnimationController animationController = new AnimationController(game);
 				MouseController mouseController = new MouseController(game);
 				KeyController keyController = new KeyController(game);
 				View view = new View(game,
-						controller,
 						mouseController,
 						keyController);
 
@@ -28,8 +31,16 @@ public class Application
 				frame.setContentPane(view);
 				frame.pack();
 				frame.setVisible(true);
-				
-				view.startGame();
+
+				Timer timer = new Timer(1000 / 60, new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						game.timerTick();
+						animationController.processTimestep();
+						view.repaint();
+					}
+				});
+				timer.start();
 			}
 		});
 	}

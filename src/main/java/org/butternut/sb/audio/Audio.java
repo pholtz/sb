@@ -1,4 +1,4 @@
-package org.butternut.sb.io;
+package org.butternut.sb.audio;
 
 import java.io.File;
 

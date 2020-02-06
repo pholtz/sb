@@ -189,7 +189,7 @@ public class Game
 	 * and moving the bucket if the player has moved the mouse.
 	 * @throws IOException 
 	 */
-	public void timerTick() throws IOException {
+	public void timerTick() {
 		
 		// TODO: Remove all timestep based logic from Game -> TimestepController
 		
@@ -986,16 +986,21 @@ public class Game
 					break;
 				}
 			}
-			FileWriter scorewriter = new FileWriter(scoresfile);
-			FileWriter namewriter = new FileWriter(namesfile);
-			for(int i = 0; i < scoresList.size(); i++) {
-				scorewriter.write(Integer.toString(scoresList.get(i)));
+			try {
+				FileWriter scorewriter = new FileWriter(scoresfile);
+				FileWriter namewriter = new FileWriter(namesfile);
+				for(int i = 0; i < scoresList.size(); i++) {
+					scorewriter.write(Integer.toString(scoresList.get(i)));
+				}
+				for(int i = 0; i < namesList.size(); i++) {
+					namewriter.write(namesList.get(i));
+				}
+				scorewriter.close();
+				namewriter.close();
+			} catch(IOException ioException ) {
+				
 			}
-			for(int i = 0; i < namesList.size(); i++) {
-				namewriter.write(namesList.get(i));
-			}
-			scorewriter.close();
-			namewriter.close();
+
 			highscoresInit = false;
 			highscores = true;
 		}

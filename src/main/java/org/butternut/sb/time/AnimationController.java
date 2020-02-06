@@ -1,18 +1,18 @@
 package org.butternut.sb.time;
 
 import org.butternut.sb.Game;
-import org.butternut.sb.io.Audio;
+import org.butternut.sb.audio.Audio;
 import org.butternut.sb.model.State;
 
-public class TimestepController
+public class AnimationController
 {
 	private final Game game;
 	
-	public TimestepController(Game game) {
+	public AnimationController(Game game) {
 		this.game = game;
 	}
 	
-	public void timestep() {
+	public void processTimestep() {
 		switch(this.game.state) {
 			case PRECRAWL:
 				this.game.clip = Audio.initAudio("src/main/resources/files/Star Wars.wav");
