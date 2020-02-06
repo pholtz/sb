@@ -27,6 +27,7 @@ import org.butternut.sb.model.Lift;
 import org.butternut.sb.model.Note;
 import org.butternut.sb.model.Point;
 import org.butternut.sb.model.Rectangle;
+import org.butternut.sb.model.State;
 import org.butternut.sb.model.Suit;
 
 public class Game
@@ -43,6 +44,7 @@ public class Game
 	private final LevelLoader levelLoader;
 	
 	// Mutable observable state
+	public State state;
 	public int levelCounter;
 	public Point cursor;
 	
@@ -106,6 +108,7 @@ public class Game
 	 */
 	public Game() throws IOException, URISyntaxException {
 		this.levelLoader = new LevelLoader();
+		this.state = State.PRECRAWL;
 		this.levelCounter = 0;
 		this.cursor = Point.of(0, 0);
 		
@@ -188,32 +191,34 @@ public class Game
 	 */
 	public void timerTick() throws IOException {
 		
-		//CRAWL INIT____________________________
-		if(crawlInit) {
-			initAudio("src/main/resources/files/Star Wars.wav");
-			crawlInit = false;
-		}
+		// TODO: Remove all timestep based logic from Game -> TimestepController
 		
-		//CRAWL LOGIC_____________________________
-		if(crawl) {
-			next++;
-			if(next == 3) {
-				introPos--;
-				next = 0;
-			}
-			if(introPos == -550) {
-				menuInit = true;
-				crawl = false;
-				clip.stop();
-			}
-		}
-		
-		//MENU INIT____________________________
-		if(menuInit) {
-			initAudio("src/main/resources/files/blinkwhats.WAV");
-			menuInit = false;
-			menu = true;
-		}
+//		//CRAWL INIT____________________________
+//		if(crawlInit) {
+//			initAudio("src/main/resources/files/Star Wars.wav");
+//			crawlInit = false;
+//		}
+//		
+//		//CRAWL LOGIC_____________________________
+//		if(crawl) {
+//			next++;
+//			if(next == 3) {
+//				introPos--;
+//				next = 0;
+//			}
+//			if(introPos == -550) {
+//				menuInit = true;
+//				crawl = false;
+//				clip.stop();
+//			}
+//		}
+//		
+//		//MENU INIT____________________________
+//		if(menuInit) {
+//			initAudio("src/main/resources/files/blinkwhats.WAV");
+//			menuInit = false;
+//			menu = true;
+//		}
 		
 		
 		//GAME INIT___________________________
@@ -713,16 +718,6 @@ public class Game
 			//BLOCKLIST COLLISION CHECK
 			for(int i = 0; i < blockList.size(); i++) {
 				//side collision
-				System.out.println(String.format("Player %s %s %s %s overlaps block %s %s %s %s -> %s",
-						String.valueOf(this.mainChar.charPos.x),
-						String.valueOf(this.mainChar.charPos.y),
-						String.valueOf(this.mainChar.charBlock.height),
-						String.valueOf(this.mainChar.charBlock.width),
-						String.valueOf(this.blockList.get(i).topLeft.x),
-						String.valueOf(this.blockList.get(i).topLeft.y),
-						String.valueOf(this.blockList.get(i).height),
-						String.valueOf(this.blockList.get(i).width),
-						String.valueOf(mainChar.charBlock.overlaps(blockList.get(i)))));
 				if(mainChar.charBlock.overlaps(blockList.get(i))) {
 					walking = false;
 					break;

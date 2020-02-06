@@ -3,8 +3,9 @@ package org.butternut.sb;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import org.butternut.sb.input.KeyController;
-import org.butternut.sb.input.MouseController;
+import org.butternut.sb.io.KeyController;
+import org.butternut.sb.io.MouseController;
+import org.butternut.sb.time.TimestepController;
 
 public class Application
 {
@@ -13,9 +14,11 @@ public class Application
 			@Override
 			public void run() {
 				Game game = Game.initialize();
+				TimestepController controller = new TimestepController(game);
 				MouseController mouseController = new MouseController(game);
 				KeyController keyController = new KeyController(game);
 				View view = new View(game,
+						controller,
 						mouseController,
 						keyController);
 

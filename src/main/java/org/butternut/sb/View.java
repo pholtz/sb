@@ -6,7 +6,6 @@ import java.awt.Graphics;
 import java.awt.Polygon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.File;
@@ -16,10 +15,12 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-import org.butternut.sb.input.KeyController;
-import org.butternut.sb.input.MouseController;
+import org.butternut.sb.io.KeyController;
+import org.butternut.sb.io.MouseController;
 import org.butternut.sb.model.Point;
 import org.butternut.sb.model.Rectangle;
+import org.butternut.sb.model.State;
+import org.butternut.sb.time.TimestepController;
 
 /**
  * KaboomView is the GUI panel class.
@@ -39,12 +40,9 @@ public class View extends JPanel
 	private static final Color ROCK = new Color(160, 160, 160);
 	
 	private final Game game;
+	private final TimestepController controller;
 	private final MouseController mouseController;
 	private final KeyController keyController;
-
-	private int x;
-	private int y;
-	private Point mouse = new Point(0, 0);
 	
 	/**
 	 * Constructor.
@@ -52,9 +50,11 @@ public class View extends JPanel
 	 * @param game the Game object representing the game state
 	 */
 	public View(Game game,
+			TimestepController controller,
 			MouseController mouseController,
 			KeyController keyController) {
 		this.game = game;
+		this.controller = controller;
 		this.mouseController = mouseController;
 		this.keyController = keyController;
 		
@@ -90,18 +90,8 @@ public class View extends JPanel
 	protected void handleTimerEvent() throws IOException {
 		// You should not need to change this method.
 		game.timerTick();
+		this.controller.timestep();
 		repaint();
-	}
-	
-	protected void handleMouseMove(MouseEvent e) {
-		if(game.menu) {
-			x = e.getX();
-			y = e.getY();
-			mouse.x = x;
-			mouse.y = y;
-			repaint();
-		}
-
 	}
 	
 	@Override
@@ -114,7 +104,7 @@ public class View extends JPanel
 		}
 		
 		//MENU_______________________________
-		if(game.menu) {
+		if(this.game.state == State.MENU) {
 			g.setColor(Color.BLACK);
 			g.fillRect(0, 0, (int) Game.WIDTH, (int) Game.HEIGHT);
 			createImage(g, "src/main/resources/files/sb2.png", 0, 0, Game.WIDTH, Game.HEIGHT); 

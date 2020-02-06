@@ -1,10 +1,11 @@
-package org.butternut.sb.input;
+package org.butternut.sb.io;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import org.butternut.sb.Game;
 import org.butternut.sb.model.Point;
+import org.butternut.sb.model.State;
 
 public class KeyController implements KeyListener
 {
@@ -27,25 +28,18 @@ public class KeyController implements KeyListener
         	}
         }
         
-        if(key == KeyEvent.VK_1 && game.menu) {
-        	
-        	//if '1' is pressed, exit menu and launch gameInit
+        // Launch level and set initial character position
+        if(key == KeyEvent.VK_1 && this.game.state == State.MENU) {
+        	this.game.state = State.PREGAME;
         	game.menu = false;
         	game.gameInit = true;
-        	
-        	//reset charPos for new game
         	game.mainChar.charPos = Point.of(0, (int)Game.HEIGHT - 2*Game.spriteHeight);
         }
-        
-        if(key == KeyEvent.VK_Q && game.crawl) {
-        	
-        	//stop crawl music
-        	game.clip.stop();
-        	
-        	//if 'q' is pressed, exit crawl and launch menuInit
-        	game.menuInit = true;
-        	game.crawl = false;
-        	
+
+        // Exit crawl, stop music, and launch menu
+        if(key == KeyEvent.VK_Q && this.game.state == State.CRAWL) {
+        	this.game.clip.stop();
+        	this.game.state = State.PREMENU;
         }
         
         if(game.game) {
