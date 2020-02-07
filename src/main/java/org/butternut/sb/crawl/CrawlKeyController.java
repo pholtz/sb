@@ -3,15 +3,12 @@ package org.butternut.sb.crawl;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import org.butternut.sb.Game;
-import org.butternut.sb.state.State;
-
 public class CrawlKeyController implements KeyListener
 {
-	private final Game game;
+	private final CrawlModel crawlModel;
 	
-	public CrawlKeyController(Game game) {
-		this.game = game;
+	public CrawlKeyController(CrawlModel crawlModel) {
+		this.crawlModel = crawlModel;
 	}
 
 	@Override
@@ -21,9 +18,8 @@ public class CrawlKeyController implements KeyListener
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
-        if(key == KeyEvent.VK_Q && this.game.state == State.CRAWL) {
-        	this.game.clip.stop();
-        	this.game.state = State.MENU;
+        if(key == KeyEvent.VK_Q) {
+        	this.crawlModel.leave = true;
         }
 	}
 

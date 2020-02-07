@@ -56,19 +56,19 @@ public class View extends JPanel
 	
 	@Override
 	protected void paintComponent(Graphics g) {
-		//CRAWL______________________________
-		if(game.crawl) {
-			g.setColor(Color.BLACK);
-			g.fillRect(0, 0, (int) Game.WIDTH, (int) Game.HEIGHT);
-			createImage(g, "src/main/resources/files/intro.png", ((int) Game.WIDTH/2) - 130, game.introPos, 263, 514);
-		}
+//		//CRAWL______________________________
+//		if(game.crawl) {
+//			g.setColor(Color.BLACK);
+//			g.fillRect(0, 0, (int) Game.WIDTH, (int) Game.HEIGHT);
+//			createImage(g, "src/main/resources/files/intro.png", ((int) Game.WIDTH/2) - 130, game.introPos, 263, 514);
+//		}
 		
-		//MENU_______________________________
-		if(this.game.state == State.MENU) {
-			g.setColor(Color.BLACK);
-			g.fillRect(0, 0, (int) Game.WIDTH, (int) Game.HEIGHT);
-			createImage(g, "src/main/resources/files/sb2.png", 0, 0, Game.WIDTH, Game.HEIGHT); 
-		}
+//		//MENU_______________________________
+//		if(this.game.state == State.MENU) {
+//			g.setColor(Color.BLACK);
+//			g.fillRect(0, 0, (int) Game.WIDTH, (int) Game.HEIGHT);
+//			createImage(g, "src/main/resources/files/sb2.png", 0, 0, Game.WIDTH, Game.HEIGHT); 
+//		}
 
 		//GAME_______________________________
 		if(game.game || game.pregame) {

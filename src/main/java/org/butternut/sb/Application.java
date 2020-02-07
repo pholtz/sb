@@ -18,7 +18,6 @@ public class Application
 			@Override
 			public void run() {
 				Game game = Game.initialize();
-				StateController stateController = new StateController(game);
 				MouseController mouseController = new MouseController(game);
 				KeyController keyController = new KeyController(game);
 				View view = new View(game,
@@ -31,13 +30,15 @@ public class Application
 				frame.setContentPane(view);
 				frame.pack();
 				frame.setVisible(true);
+				
+				StateController stateController = new StateController(frame, game);
 
 				Timer timer = new Timer(1000 / 60, new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						game.timerTick();
 						stateController.processTimestep();
-						view.repaint();
+//						view.repaint();
 					}
 				});
 				timer.start();

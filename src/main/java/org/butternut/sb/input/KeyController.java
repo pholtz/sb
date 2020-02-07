@@ -28,14 +28,6 @@ public class KeyController implements KeyListener
         	}
         }
         
-        // Launch level and set initial character position
-        if(key == KeyEvent.VK_1 && this.game.state == State.MENU) {
-        	this.game.state = State.GAME;
-        	game.menu = false;
-        	game.gameInit = true;
-        	game.mainChar.charPos = Point.of(0, (int)Game.HEIGHT - 2*Game.spriteHeight);
-        }
-        
         if(game.game) {
             if (key == KeyEvent.VK_KP_LEFT || key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)
             {

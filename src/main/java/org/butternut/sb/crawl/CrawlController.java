@@ -6,14 +6,16 @@ import javax.sound.sampled.Clip;
 
 import org.butternut.sb.Game;
 import org.butternut.sb.audio.Audio;
-import org.butternut.sb.state.State;
 
 public class CrawlController
 {
 	private final Game game;
+	private final CrawlModel crawlModel;
 	
-	public CrawlController(Game game) {
+	public CrawlController(Game game,
+			CrawlModel crawlModel) {
 		this.game = game;
+		this.crawlModel = crawlModel;
 	}
 	
 	public void initializeCrawl() {
@@ -28,7 +30,7 @@ public class CrawlController
 			this.game.next = 0;
 		}
 		if(this.game.introPos == -550) {
-			this.game.state = State.MENU;
+			this.crawlModel.leave = true;
 			this.game.clip.stop();
 		}
 	}

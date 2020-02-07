@@ -1,4 +1,4 @@
-package org.butternut.sb.crawl;
+package org.butternut.sb.menu;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -9,22 +9,22 @@ import javax.swing.JPanel;
 import org.butternut.sb.Game;
 import org.butternut.sb.asset.Assets;
 
-public class CrawlView extends JPanel
+public class MenuView extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	private final Game game;
-	private final CrawlModel crawlModel;
-	private final CrawlKeyController crawlKeyController;
+	private final MenuModel menuModel;
+	private final MenuKeyController menuKeyController;
 	
-	public CrawlView(Game game,
-			CrawlModel crawlModel) {
+	public MenuView(Game game,
+			MenuModel menuModel) {
 		this.game = game;
-		this.crawlModel = crawlModel;
-		this.crawlKeyController = new CrawlKeyController(crawlModel);
+		this.menuModel = menuModel;
+		this.menuKeyController = new MenuKeyController(menuModel);
 		
 		this.setPreferredSize(new Dimension((int) Game.WIDTH, (int) Game.HEIGHT));
 		
-		super.addKeyListener(this.crawlKeyController);
+		super.addKeyListener(this.menuKeyController);
 	    super.setFocusable(true);
 	    super.requestFocusInWindow();
 	}
@@ -33,6 +33,6 @@ public class CrawlView extends JPanel
 	protected void paintComponent(Graphics g) {
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, (int) Game.WIDTH, (int) Game.HEIGHT);
-		Assets.createImage(g, "src/main/resources/files/intro.png", ((int) Game.WIDTH/2) - 130, game.introPos, 263, 514);
+		Assets.createImage(g, "src/main/resources/files/sb2.png", 0, 0, Game.WIDTH, Game.HEIGHT); 
 	}
 }
