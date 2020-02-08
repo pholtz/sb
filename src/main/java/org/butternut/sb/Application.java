@@ -38,7 +38,6 @@ public class Application
 					public void actionPerformed(ActionEvent e) {
 						game.timerTick();
 						stateController.processTimestep();
-//						view.repaint();
 					}
 				});
 				timer.start();

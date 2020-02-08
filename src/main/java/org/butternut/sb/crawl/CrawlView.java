@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 
 import org.butternut.sb.Game;
 import org.butternut.sb.asset.Assets;
+import org.butternut.sb.swing.Panels;
 
 public class CrawlView extends JPanel
 {
@@ -23,10 +24,11 @@ public class CrawlView extends JPanel
 		this.crawlKeyController = new CrawlKeyController(crawlModel);
 		
 		this.setPreferredSize(new Dimension((int) Game.WIDTH, (int) Game.HEIGHT));
-		
 		super.addKeyListener(this.crawlKeyController);
-	    super.setFocusable(true);
-	    super.requestFocusInWindow();
+	}
+	
+	public void initialize() {
+		Panels.requestFocus(this);
 	}
 	
 	@Override

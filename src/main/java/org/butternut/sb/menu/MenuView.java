@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 
 import org.butternut.sb.Game;
 import org.butternut.sb.asset.Assets;
+import org.butternut.sb.swing.Panels;
 
 public class MenuView extends JPanel
 {
@@ -23,10 +24,11 @@ public class MenuView extends JPanel
 		this.menuKeyController = new MenuKeyController(menuModel);
 		
 		this.setPreferredSize(new Dimension((int) Game.WIDTH, (int) Game.HEIGHT));
-		
 		super.addKeyListener(this.menuKeyController);
-	    super.setFocusable(true);
-	    super.requestFocusInWindow();
+	}
+	
+	public void initialize() {
+		Panels.requestFocus(this);
 	}
 	
 	@Override
